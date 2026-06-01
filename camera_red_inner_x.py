@@ -23,7 +23,7 @@ import ctypes
 import math
 import sys
 import time
-
+import serial
 import cv2
 import numpy as np
 
@@ -226,6 +226,7 @@ def main():
         print("image_env1.png not found; using best filter without env suppression.")
 
     ser = open_robot_serial()
+    print(ser)
     if ser is None:
         print(
             "UART disabled (set ROBOX_SERIAL_PORT, e.g. COM3, to send yaw/pitch to the robot).",
@@ -240,14 +241,11 @@ def main():
     last_uart = 0.0
     total_frames = 0
     hits = 0
-
     while True:
         ret = cam.MV_CC_GetOneFrameTimeout(data_buf, payload_size, stFrameInfo, 1000)
         if ret != 0:
             continue
-
         total_frames += 1
-
         w, h = stFrameInfo.nWidth, stFrameInfo.nHeight
         img_rgb = np.frombuffer(data_buf, dtype=np.uint8, count=w * h * 3).reshape(h, w, 3)
         img_bgr = cv2.cvtColor(img_rgb, cv2.COLOR_RGB2BGR)
@@ -263,6 +261,7 @@ def main():
 
         if left_r is not None and right_r is not None:
             l_top, r_bot, l_bot, r_top, inter = inner_corners_and_x(left_r, right_r)
+            #X lines (cyan) slightly thick
             col = (255, 255, 0)
             cv2.line(
                 display,
@@ -329,18 +328,9 @@ def main():
         fps = 1.0 / (t_now - t_prev) if t_now > t_prev else 0.0
         t_prev = t_now
 
-        hit_pct = 100.0 * hits / total_frames if total_frames else 0.0
+        hit_pct = (hits / total_frames * 100) if total_frames else 0.0
         cv2.putText(display, f"{fps:.1f} FPS", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2)
-        cv2.putText(
-            display,
-            f"Hit {hit_pct:.1f}% ({hits}/{total_frames})",
-            (10, 60),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.7,
-            (0, 255, 0),
-            2,
-            cv2.LINE_AA,
-        )
+        cv2.putText(display, f"{hit_pct:.1f}% ({hits}/{total_frames})", (10, 60), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2, cv2.LINE_AA,)
 
         cv2.imshow("Red filter + inner X — Live", display)
         if cv2.waitKey(1) & 0xFF == ord("q"):

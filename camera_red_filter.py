@@ -11,18 +11,25 @@ import ctypes
 import cv2
 import numpy as np
 from pathlib import Path
+import platform
 
 # Same DLL setup as camera.py
+platform.system() =='Windows'
+dll_file = "MvCameraControl.dll"
+path_sep = ";"
 DLL_DIRS = [
-    r"C:\Program Files (x86)\Common Files\MVS\Runtime\Win64_x64",
-    r"C:\Program Files\Common Files\MVS\Runtime\Win64_x64",
+    r"/home/robox/Desktop/RoboX-Camera/MVS/Win64_x64",
 ]
 
-dll_dir = next((d for d in DLL_DIRS if os.path.exists(os.path.join(d, "MvCameraControl.dll"))), None)
+dll_dir = next((d for d in DLL_DIRS if os.path.exists(os.path.join(d, dll_file))), None)
 if dll_dir is None:
-    raise FileNotFoundError("MvCameraControl.dll not found. Install HIKRobot MVS (Windows x64).")
+    raise FileNotFoundError(f"{dll_file} not found. Install HIKRobot MVS (Windows x64).")
 
-os.add_dll_directory(dll_dir)
+if platform.system() == 'Windows':
+    os.add_dll_directory(dll_dir)
+else:
+    os.environ["LD_LIBRARY_PATH"] = dll_dir + ":" + path_sep + os.environ.get("LD_LIBRARY_PATH", "")
+    
 os.environ["PATH"] = dll_dir + ";" + os.environ.get("PATH", "")
 
 from MVS.MvCameraControl_class import *
