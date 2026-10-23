@@ -13,26 +13,37 @@ import numpy as np
 from pathlib import Path
 import platform
 
+import sys
+sys.path.append("/opt/MVS/Samples/64/Python/MvImport")
+from MvCameraControl_class import *
+
 # Same DLL setup as camera.py
-platform.system() =='Windows'
-dll_file = "MvCameraControl.dll"
-path_sep = ";"
-DLL_DIRS = [
-    r"/home/robox/Desktop/RoboX-Camera/MVS/Win64_x64",
-]
+if platform.system() =='Windows':
+    dll_file = "MvCameraControl.dll"
+    path_sep = ";"
+    DLL_DIRS = [
+        r"/home/robox/Desktop/RoboX-Camera/MVS/Win64_x64",
+    ]
 
-dll_dir = next((d for d in DLL_DIRS if os.path.exists(os.path.join(d, dll_file))), None)
-if dll_dir is None:
-    raise FileNotFoundError(f"{dll_file} not found. Install HIKRobot MVS (Windows x64).")
+    dll_dir = next((d for d in DLL_DIRS if os.path.exists(os.path.join(d, dll_file))), None)
+    if dll_dir is None:
+        raise FileNotFoundError(f"{dll_file} not found. Install HIKRobot MVS (Windows x64).")
 
-if platform.system() == 'Windows':
-    os.add_dll_directory(dll_dir)
-else:
-    os.environ["LD_LIBRARY_PATH"] = dll_dir + ":" + path_sep + os.environ.get("LD_LIBRARY_PATH", "")
+    if platform.system() == 'Windows':
+        os.add_dll_directory(dll_dir)
+    else:
+        os.environ["LD_LIBRARY_PATH"] = dll_dir + ":" + path_sep + os.environ.get("LD_LIBRARY_PATH", "")
     
-os.environ["PATH"] = dll_dir + ";" + os.environ.get("PATH", "")
+        os.environ["PATH"] = dll_dir + ";" + os.environ.get("PATH", "")
 
-from MVS.MvCameraControl_class import *
+    from MVS.MvCameraControl_class import *
+
+
+else:
+    lib = "/opt/MVS/lib/64/libMvCameraControl.so"
+    if not os.path.exists(lib):
+        raise FileNotFoundError(f"{lib} not found. Install the Linux MVS SDK.")
+    os.environ.setdefault("MVCAM_COMMON_RUNENV", "/opt/MVS/lib")
 
 
 # Same intensity as camera_blue_filter / filters.py best blue

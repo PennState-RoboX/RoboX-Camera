@@ -45,7 +45,8 @@ from camera_red_inner_x import (
     inner_corners_and_x,
     inner_edge_gap_px,
 )
-from MVS.MvCameraControl_class import *
+sys.path.append("/opt/MVS/Samples/aarch64/Python/MvImport")
+from MvCameraControl_class import *
 
 # ── optional: list known distances (cm) in the order you will place markers ──
 KNOWN_DISTANCES_CM: list[float] = []   # e.g. [30, 50, 75, 100, 125, 150]

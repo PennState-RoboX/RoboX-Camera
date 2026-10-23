@@ -89,12 +89,26 @@ _MV_PY_OBJECT_._fields_ = [
 MV_PY_OBJECT = _MV_PY_OBJECT_
 
 
+#液态镜头正常消息回调
+MvLiquidLensMsgCallback = CFUNCTYPE(None, POINTER(MV_CC_LIQUIDLENS_MSG), c_void_p)
+#液态镜头异常消息回调
+MvLiquidLensExceptionCallback = CFUNCTYPE(None, POINTER(MV_CC_LIQUIDLENS_EXCEPTION_MSG), c_void_p)
+
+
 class MvCamera():
 
     def __init__(self):
         self._handle = c_void_p()  # 记录当前连接设备的句柄
         self.handle = pointer(self._handle)  # 创建句柄指针
-        
+
+        self._c_LiquidLensRangeScanMsgCallback = c_void_p()  
+        self.c_LiquidLensRangeScanMsgCallback  = pointer(self._c_LiquidLensRangeScanMsgCallback)   # 液态镜头消息回调     光焦度区间扫描
+
+        self._c_LiquidLensFocalPowerMsgCallback = c_void_p()  
+        self.c_LiquidLensFocalPowerMsgCallback  = pointer(self._c_LiquidLensFocalPowerMsgCallback)     # 液态镜头消息回调     多焦度轮询
+
+        self._c_LiquidLensExceptionCallback = c_void_p()  
+        self.c_LiquidLensExceptionCallback  = pointer(self._c_LiquidLensExceptionCallback)   # 液态镜头异常回调    
 
     ## @addtogroup  SDK 初始化 | en: SDK Initialization 
     ## @{
@@ -102,21 +116,21 @@ class MvCamera():
     ##
     #  @~chinese
     #  @brief    初始化SDK
-    #  @return   成功，返回MV_OK；错误，返回错误码
+    #  @return   成功，返回\ref 状态码 "MV_OK"；失败，返回\ref 状态码
 
     #  @~english
     #  @brief  Initialize SDK  
     #  @return  Success, return MV_OK. Failure, return error code  
     @staticmethod
     def MV_CC_Initialize():
-        MvCamCtrldll.MV_CC_Initialize.restype = c_int
+        MvCamCtrldll.MV_CC_Initialize.restype = c_uint
         return MvCamCtrldll.MV_CC_Initialize()
 
     ##
     #  @~chinese
     #  @brief    反初始化SDK，释放资源
-    #  @return   成功，返回MV_OK；错误，返回错误码
-    #  @remarks  main函数退出前调用
+    #  @return   成功，返回\ref 状态码 "MV_OK"；失败，返回\ref 状态码
+    #  @note  main函数退出前调用
 
     #  @~english
     #  @brief   Terminate SDK  
@@ -124,15 +138,16 @@ class MvCamera():
     #  @remarks  Called before the main function exits
     @staticmethod
     def MV_CC_Finalize():
-        MvCamCtrldll.MV_CC_Finalize.restype = c_int
+        MvCamCtrldll.MV_CC_Finalize.restype = c_uint
         return MvCamCtrldll.MV_CC_Finalize()
 
     ##
     #  @~chinese
     #  @brief  获取SDK版本号
     #  @return 返回4字节版本号
-    #       |主    |次    |修正  |  测试|
-    #        8bits  8bits  8bits  8bits
+    #       | 主 | 次 | 修正 | 测试 |
+    #       | --- | --- | --- | --- |
+    #       | 8bits | 8bits | 8bits | 8bits |
     #  @remarks 比如返回值为0x01000001，即SDK版本号为V1.0.0.1。
 
     #  @~english
@@ -156,16 +171,16 @@ class MvCamera():
     ##
     #  @~chinese
     #  @brief  枚举设备
-    #  @param  nTLayerType                 [IN]            枚举传输层, 参数定义参见CameraParams.h定义, 如: #define MV_GIGE_DEVICE 0x00000001 GigE设备
+    #  @param  nTLayerType                 [IN]            枚举传输层, 参数定义参见CameraParams_const.py定义, 如: #define MV_GIGE_DEVICE 0x00000001 GigE设备
     #  @param  pstDevList                  [IN][OUT]       设备列表
-    #  @return 成功，返回MV_OK；错误，返回错误码 
+    #  @return 成功，返回\ref 状态码 "MV_OK"；失败，返回\ref 状态码 
     #  @remarks 设备列表的内存是在SDK内部分配的，多线程调用该接口时会进行设备列表内存的释放和申请,建议尽量避免多线程枚举操作。
     #  @remarks 参数枚举传输层，适配传入MV_GIGE_DEVICE、MV_1394_DEVICE、MV_USB_DEVICE、MV_CAMERALINK_DEVICE；MV_GIGE_DEVICE该参数
-    #           传出所有GiGE相关的设备信息（包含虚拟GiGE和GenTL下的GiGE设备），MV_USB_DEVICE该参数传出所有USB设备，包含虚拟USB设备。
+    #           传出所有GigE Vision相关的设备信息（包含虚拟GigE Vision和GenTL下的GigE Vision设备），MV_USB_DEVICE该参数传出所有USB3 Vision设备，包含虚拟USB3 Vision设备。
 
     #  @~english
     #  @brief  Enumerate Device
-    #  @param  nTLayerType                 [IN]            Enumerate TLs, Refer to the 'CameraParams.h' for parameter definitions, for example, #define MV_GIGE_DEVICE 0x00000001
+    #  @param  nTLayerType                 [IN]            Enumerate TLs, Refer to the 'CameraParams_const.py' for parameter definitions, for example, #define MV_GIGE_DEVICE 0x00000001
     #  @param  pstDevList                  [IN][OUT]       Device List
     #  @return Success, return MV_OK. Failure, return error code 
     #  @remarks The memory of the device list is allocated within the SDK. When the interface is invoked by multiple threads, the memory of the device list will be released and applied
@@ -184,14 +199,16 @@ class MvCamera():
     #  @param  nTLayerType                 [IN]            枚举传输层, 参数定义参见CameraParams.h定义, 如: #define MV_GIGE_DEVICE 0x00000001 GigE设备
     #  @param  pstDevList                  [IN][OUT]       设备列表
     #  @param  strManufacturerName         [IN]            厂商名字
-    #  @return 成功，返回MV_OK；错误，返回错误码 
-    #  @remarks 参数枚举传输层，适配传入MV_GIGE_DEVICE、MV_1394_DEVICE、MV_USB_DEVICE、MV_CAMERALINK_DEVICE；MV_GIGE_DEVICE该参数
-    #       传出所有GiGE相关的设备信息（包含虚拟GiGE和GenTL下的GiGE设备），MV_USB_DEVICE该参数传出所有USB设备，包含虚拟USB设备。
-    #  @remarks 设备列表的内存是在SDK内部分配的，多线程调用该接口时会进行设备列表内存的释放和申请,建议尽量避免多线程枚举操作。
+    #  @return 成功，返回\ref 状态码 "MV_OK"；失败，返回\ref 状态码 
+    #  @remarks 
+    #  参数枚举传输层，适配传入MV_GIGE_DEVICE、MV_1394_DEVICE、MV_USB_DEVICE、MV_CAMERALINK_DEVICE。
+    #   - MV_GIGE_DEVICE参数传出所有GigE Vision相关的设备信息（包含虚拟GigE Vision和GenTL下的GigE Vision设备）。
+    #   - MV_USB_DEVICE参数传出所有USB3 Vision设备，包含虚拟USB3 Vision设备。
+    #  @note 设备列表的内存是在SDK内部分配的，多线程调用该接口时会进行设备列表内存的释放和申请，建议尽量避免多线程枚举操作。
 
     #  @~english
     #  @brief  Enumerate device according to manufacture name
-    #  @param  nTLayerType                 [IN]            Transmission layer of enumeration, , Refer to the 'CameraParams.h' for parameter definitions, for example, #define MV_GIGE_DEVICE 0x00000001
+    #  @param  nTLayerType                 [IN]            Transmission layer of enumeration, , Refer to the 'CameraParams_const' for parameter definitions, for example, #define MV_GIGE_DEVICE 0x00000001
     #  @param  pstDevList                  [IN][OUT]       Device list
     #  @param  strManufacturerName         [IN]            Manufacture Name
     #  @return Success, return MV_OK. Failure, return error code
@@ -215,13 +232,14 @@ class MvCamera():
     #  @param  pstDevList                  [IN][OUT]       设备列表
     #  @param  strManufacturerName         [IN]            厂商名字（可传NULL，即不过滤）
     #  @param  enSortMethod                [IN]            排序方式
-    #  @return 成功，返回MV_OK；错误，返回错误码 
-    #  @remarks 设备列表的内存是在SDK内部分配的，多线程调用该接口时会进行设备列表内存的释放和申请,建议尽量避免多线程枚举操作
-    #        strManufacturerName可传入NULL，若传入NULL则返回排好序的所有设备列表,若不为NULL则只返回排好序的指定厂商设备列表。
+    #  @return 成功，返回\ref 状态码 "MV_OK"；失败，返回\ref 状态码 
+    #  @remarks
+    #  - 设备列表的内存是在SDK内部分配的，多线程调用该接口时会进行设备列表内存的释放和申请，建议尽量避免多线程枚举操作
+    #  - strManufacturerName可传入NULL，即不过滤若传入NULL则返回排序后的所有设备列表，若不为NULL则只返回排序后的指定厂商设备列表。
 
     #  @~english
     #  @brief  Enumerate device according to the specified ordering
-    #  @param  nTLayerType                 [IN]            Transmission layer of enumeration(All layer protocol type can input), Refer to the 'CameraParams.h' for parameter definitions, for example, #define MV_GIGE_DEVICE 0x00000001
+    #  @param  nTLayerType                 [IN]            Transmission layer of enumeration(All layer protocol type can input), Refer to the 'CameraParams_const' for parameter definitions, for example, #define MV_GIGE_DEVICE 0x00000001
     #  @param  pstDevList                  [IN][OUT]       Device list
     #  @param  strManufacturerName         [IN]            Manufacture Name
     #  @param  enSortMethod                [IN]            Sorting Method
@@ -493,8 +511,7 @@ class MvCamera():
     #        该接口与MV_CC_FreeImageBuffer配套使用，当处理完取到的数据后，需要用MV_CC_FreeImageBuffer接口将pFrame内的数据指针权限进行释放。
     #        该接口与MV_CC_GetOneFrameTimeout相比，有着更高的效率。且其取流缓存的分配是由sdk内部自动分配的，而MV_CC_GetOneFrameTimeout接口是需要客户自行分配。
     #        该接口在调用MV_CC_Display后无法取流。
-    #        该接口对于U3V、GIGE设备均可支持。
-    #        该接口不支持CameraLink设备。
+
 
     #  @~english
     #  @brief  Get a frame of an image using an internal cache
@@ -507,8 +524,6 @@ class MvCamera():
     #        This API and MV_CC_FreeImageBuffer should be called in pairs, after processing the acquired data, you should call MV_CC_FreeImageBuffer to release the data pointer permission of pFrame. 
     #        This interface is more efficient than MV_CC_GetOneFrameTimeout. The allocation of the stream cache is automatically allocated within the SDK.The MV_CC_GetOneFrameTimeout interface needs to be allocated by customers themselves. 
     #        This API cannot be called to stream after calling MV_CC_Display.
-    #        This API is not supported by CameraLink device. 
-    #        This API is supported by both USB3 vision camera and GigE camera. 
     def MV_CC_GetImageBuffer(self, stFrame, nMsec):
         MvCamCtrldll.MV_CC_GetImageBuffer.argtype = (c_void_p, c_void_p, c_uint)
         MvCamCtrldll.MV_CC_GetImageBuffer.restype = c_uint
@@ -523,8 +538,6 @@ class MvCamera():
     #  @remarks 该接口与MV_CC_GetImageBuffer配套使用，使用MV_CC_GetImageBuffer接口取到的图像数据pFrame，需要用MV_CC_FreeImageBuffer接口进行权限释放
     #        该接口取流效率高于GetOneFrameTimeout接口
     #        当GetImageBuffer不进行FreeImageBuffer时，最大输出图像个数为当前配置下SDK的缓存节点个数(用户可以调用SetImageNode接口，调节SDK的缓存个数）
-    #        该接口对于U3V、GIGE设备均可支持
-    #        该接口不支持CameraLink设备。
 
     #  @~english
     #  @brief  Free image buffer(this interface can free image buffer, used with MV_CC_GetImageBuffer)
@@ -534,12 +547,34 @@ class MvCamera():
     #  @remarks MV_CC_FreeImageBuffer and MV_CC_GetImageBuffer API call in pairs, before calling MV_CC_GetImageBuffer to get image data pFrame, you should call MV_CC_FreeImageBuffer to release the permission.
     #        Compared with API MV_CC_GetOneFrameTimeout
     #        The API has higher efficiency of image acquisition. The max. number of nodes can be outputted is same as the "nNum" of  the current configuration of the SDK's cache (users can call the SetImageNode interface to adjust the SDK's cache count)
-    #        The API is not supported by CameraLink device.
-    #        The API is supported by both USB3 vision camera and GigE camera. 
     def MV_CC_FreeImageBuffer(self, stFrame):
         MvCamCtrldll.MV_CC_FreeImageBuffer.argtype = (c_void_p, c_void_p)
         MvCamCtrldll.MV_CC_FreeImageBuffer.restype = c_uint
         return MvCamCtrldll.MV_CC_FreeImageBuffer(self.handle, byref(stFrame))
+
+    ##
+    #  @~chinese
+    #  @brief  获取设备payload大小（payload包含图像数据和Chunk数据等）和内存对其方式，用于SDK外部注册缓存时，应用层分配足够的缓存及正确的内存对齐方式
+    #  @param  handle                      [IN]            设备句柄
+    #  @param  pnPayloadSize               [IN OUT]        负载长度
+    #  @param  pnAlignment                 [IN OUT]        负载内存对齐的字节数 
+    #  @return 成功，返回MV_OK；错误，返回错误码
+    #  @remarks 获取到的payload大小如果想要改大，需要按照对齐字节数的整数倍增加
+
+
+    #  @~english
+    #  @brief  Gets the device payload size (including image data and Chunk data,and more) and memory alignment method.  It is used by the application layer to allocate sufficient buffer and correct memory alignment when registering external memory for SDK. 
+    #  @param  handle                      [IN]            Device handle
+    #  @param  pnPayloadSize               [IN OUT]        It refers to the payload size. 
+    #  @param  pnAlignment                 [IN OUT]        It refers to alignment bytes.
+    #  @return Success, return MV_OK. Failure, return error code
+    #  @emarks If you want to increase the size of the obtained payload, it must be increased by an integer multiple of the aligned byte count. 
+
+    def MV_CC_GetPayloadSize(self, pnPayloadSize, pnAlignment):
+        MvCamCtrldll.MV_CC_GetPayloadSize.argtype = (c_void_p, c_uint64, c_uint)
+        MvCamCtrldll.MV_CC_GetPayloadSize.restype = c_uint
+        return MvCamCtrldll.MV_CC_GetPayloadSize(self.handle, byref(pnPayloadSize), byref(pnAlignment))
+
 
 
     ##
@@ -677,23 +712,19 @@ class MvCamera():
     #  @param  nNum                        [IN]            缓存节点个数
     #  @return 成功，返回MV_OK；错误，返回错误码
     #  @remarks 调用该接口可以设置SDK内部图像缓存节点个数，在调用MV_CC_StartGrabbing开始抓图前调用。
-    #        不同相机因为取流方式不同，不调用MV_CC_SetImageNodeNum接口情况下，默认不同相机默认缓存节点个数不同
-    #        SDK实际分配的节点个数 = SDK内部预分配的个数 + 用户分配的节点(MV_CC_SetImageNodeNum)，其中SDK内部预分配的个数仅供内部使用，比如双U内部会多分配2个节点;若系统内存资源不够,SDK内部会重新计算, 以重新计算的节点个数为准
-    #        接口不支持MV_CAMERALINK_DEVICE 类型的设备。
-    #        该接口仅对SDK内部分配缓存模式有效，外部分配缓存模式（即调用MV_CC_RegisterBuffer）无效;
+    #        该接口不支持MV_CAMERALINK_DEVICE设备。 
+    #        网口、U口相机会在MV_CC_StartGrabbing时进行内存校验，若系统内存不足，则MV_CC_StartGrabbing返回异常。
+    #        其他采集卡下相机，MV_CC_StartGrabbing时检测系统内存资源不够，SDK内部将重新计算预分配的缓存节点个数，在该情况下，SDK实际分配的节点个数以重新计算的节点个数为准。
 
     #  @~english
     #  @brief  Set the number of the internal image cache nodes in SDK, Greater than or equal to 1, to be called before the capture
     #  @param  handle                      [IN]            Device handle
     #  @param  nNum                        [IN]            Image Node Number
     #  @return Success, return MV_OK. Failure, return error code
-    #  @remarks Call this interface to set the number of SDK internal image buffer nodes. The interface should be called before calling MV_CC_StartGrabbing for capturing. 
-    
-    #        Due to differing streaming methods among cameras, the default number of buffer nodes varies across different camera models when the MV_CC_SetImageNodeNum interface is not invoked.
-    #        The actual number of nodes allocated by the SDK = the sum of the SDK's internal pre-allocated nodes + user-specified nodes (set via MV_CC_SetImageNodeNum). The internally pre-allocated nodes are reserved for internal use only, such as the dual-U configuration which allocates an additional 2 nodes internally.
-    #        If the system memory resources are insufficient, the SDK will recalculate and use it as the actual number of nodes.
-    #        This interface does not support devices of type MV_CAMERALINK_DEVICE
-    #        This interface is only valid for the SDK's internal allocation cache mode, and the external allocation cache mode (i.e., calling MV_CC_RegisterBuffer) is invalid;
+    #  @remarks  Call this API before MV_CC_StartGrabbing() to set the number of nodes for SDK internal image buffer.
+    #        This API does not support devices of type MV_CAMERALINK_DEVICE
+    #        For cameras with network interface or U port, the SDK will perform a memory check when calling MV_CC_StartGrabbing. If the system memory is insufficient, MV_CC_StartGrabbing will return an exception
+    #        For cameras using other capture cards, when calling MV_CC_StartGrabbing, the SDK detects that the system memory is insufficient and will internally recalculate the number of pre-allocated buffer nodes. In this case, the actual number of nodes allocated by the Software Development Kit (SDK) will be based on the recalculated number.
     def MV_CC_SetImageNodeNum(self, nNum):
         MvCamCtrldll.MV_CC_SetImageNodeNum.argtype = (c_void_p, c_uint)
         MvCamCtrldll.MV_CC_SetImageNodeNum.restype = c_uint
@@ -708,10 +739,10 @@ class MvCamera():
     #  @remarks 该接口定义了四种取流策略，用户可以根据实际需求进行选择。具体描述如下：
     #           OneByOne:           从旧到新一帧一帧的从输出缓存列表中获取图像，打开设备后默认为该策略
     #           LatestImagesOnly:   仅从输出缓存列表中获取最新的一帧图像，同时清空输出缓存列表
-    #           LatestImages:       从输出缓存列表中获取最新的OutputQueueSize帧图像，其中OutputQueueSize范围为1-ImageNodeNum，可用MV_CC_SetOutputQueueSize接口设置，ImageNodeNum默认为1，
-    #                               可用MV_CC_SetImageNodeNum接口设置 OutputQueueSize设置成1等同于LatestImagesOnly策略，OutputQueueSize设置成ImageNodeNum等同于OneByOne策略
-    #           UpcomingImage:      在调用取流接口时忽略输出缓存列表中所有图像，并等待设备即将生成的一帧图像。（该策略不支持MV_USB_DEVICE设备）
-    #        该接口在Windows平台仅支持MV_GIGE_DEVICE、MV_USB_DEVICE设备，在Linux平台仅支持MV_USB_DEVICE设备；
+    #           LatestImages:       从输出缓存列表中获取最新的OutputQueueSize帧图像，其中OutputQueueSize范围为1-ImageNodeNum，可用 MV_CC_SetOutputQueueSize() 接口设置，ImageNodeNum默认为1，可用 MV_CC_SetImageNodeNum() 接口设置 OutputQueueSize设置成1等同于LatestImagesOnly策略，OutputQueueSize设置成ImageNodeNum等同于OneByOne策略
+    #           UpcomingImage:      在调用取流接口时忽略输出缓存列表中所有图像，并等待设备即将生成的一帧图像。（该策略仅支持GigE Vision设备和USB3 Vision设备）
+    #           Windows平台支持： MV_GIGE_DEVICE  MV_USB_DEVICE   MV_GENTL_GIGE_DEVICE  MV_GENTL_CAMERALINK_DEVICE  MV_GENTL_CXP_DEVICE  MV_GENTL_XOF_DEVICE 设备
+    #           Linux平台支持： MV_USB_DEVICE   MV_GENTL_GIGE_DEVICE    MV_GENTL_CAMERALINK_DEVICE   MV_GENTL_CXP_DEVICE   MV_GENTL_XOF_DEVICE 设备。
 
     #  @~english
     #  @brief  Set Grab Strategy
@@ -726,7 +757,8 @@ class MvCamera():
     #                     If the user usesMV_CC_SetImageNodeNuminterface to set up OutputQueueSize,when the value of OutputQueueSize is set to be 1, 
     #                     the function will be same as LatestImagesOnly; if the value of OutputQueueSize is set to be ImageNodeNum, the function will be same as OneByOne.
     #           UpcomingImage:Ignore all images in output cache list when calling image acuiqisiotn interface, wait the next upcoming image generated.(This strategy does not support MV_USB_DEVICE device) 
-   #         This API only support MV_GIGE_DEVICE, MV_USB_DEVICE device on Windows, and only support MV_USB_DEVICE device on Linux.
+    #            Device Types Supported by Windows Platform: MV_GIGE_DEVICE、MV_USB_DEVICE、MV_GENTL_GIGE_DEVICE、MV_GENTL_CAMERALINK_DEVICE、MV_GENTL_CXP_DEVICE、MV_GENTL_XOF_DEVICE.
+    #            Device Types Supported by Linux Platform: MV_USB_DEVICE、MV_GENTL_GIGE_DEVICE、MV_GENTL_CAMERALINK_DEVICE、MV_GENTL_CXP_DEVICE、MV_GENTL_XOF_DEVICE.
     def MV_CC_SetGrabStrategy(self, enGrabStrategy):
         MvCamCtrldll.MV_CC_SetGrabStrategy.argtype = (c_void_p, c_uint)
         MvCamCtrldll.MV_CC_SetGrabStrategy.restype = c_uint
@@ -740,7 +772,8 @@ class MvCamera():
     #  @param  nOutputQueueSize            [IN]            输出缓存个数
     #  @return 成功，返回MV_OK；错误，返回错误码
     #  @remarks 该接口需与LatestImages取流策略配套调用，用于设置LatestImages策略下最多允许缓存图像的个数。可以在取流过程中动态调节输出缓存个数
-    #        该接口在Windows平台仅支持MV_GIGE_DEVICE、MV_USB_DEVICE设备，在Linux平台仅支持MV_USB_DEVICE设备；
+     #          Windows平台支持： MV_GIGE_DEVICE  MV_USB_DEVICE   MV_GENTL_GIGE_DEVICE  MV_GENTL_CAMERALINK_DEVICE  MV_GENTL_CXP_DEVICE  MV_GENTL_XOF_DEVICE 设备
+    #           Linux平台支持： MV_USB_DEVICE   MV_GENTL_GIGE_DEVICE    MV_GENTL_CAMERALINK_DEVICE   MV_GENTL_CXP_DEVICE   MV_GENTL_XOF_DEVICE 设备。
 
     #  @~english
     #  @brief  Set The Size of Output Queue(Only work under the strategy of MV_GrabStrategy_LatestImages，rang：1-ImageNodeNum)
@@ -749,7 +782,8 @@ class MvCamera():
     #  @return Success, return MV_OK. Failure, return error code
     #  @remarks This interface must be used with LatestImages Grab strategy, it is used for setting the maximum allowance queue size of the image under the LatestImages strategy.
     #        The user may change the output queue size while grabbing images.
-    #        This API only support MV_GIGE_DEVICE, MV_USB_DEVICE device on Windows, and only support MV_USB_DEVICE device on Linux.
+    #            Device Types Supported by Windows Platform: MV_GIGE_DEVICE、MV_USB_DEVICE、MV_GENTL_GIGE_DEVICE、MV_GENTL_CAMERALINK_DEVICE、MV_GENTL_CXP_DEVICE、MV_GENTL_XOF_DEVICE.
+    #            Device Types Supported by Linux Platform: MV_USB_DEVICE、MV_GENTL_GIGE_DEVICE、MV_GENTL_CAMERALINK_DEVICE、MV_GENTL_CXP_DEVICE、MV_GENTL_XOF_DEVICE.
     def MV_CC_SetOutputQueueSize(self, nOutputQueueSize):
         MvCamCtrldll.MV_CC_SetOutputQueueSize.argtype = (c_void_p, c_uint)
         MvCamCtrldll.MV_CC_SetOutputQueueSize.restype = c_uint
@@ -761,7 +795,7 @@ class MvCamera():
     #  @param  handle                      [IN]            设备句柄
     #  @param  pstDevInfo                  [IN][OUT]       返回给调用者有关设备信息结构体指针
     #  @return 成功,返回MV_OK,失败,返回错误码
-    #  @remarks 支持用户在打开设备后获取设备信息，不支持GenTL设备
+    #  @remarks 支持用户在打开设备后获取设备信息，不支持通过GenTL设备信息创建的设备
     #        若该设备是GigE设备，则调用该接口存在阻塞风险，因此不建议在取流过程中调用该接口。
 
     #  @~english
@@ -769,14 +803,12 @@ class MvCamera():
     #  @param  handle                      [IN]            Device handle
     #  @param  pstDevInfo                  [IN][OUT]       Structure pointer of device information
     #  @return Success, return MV_OK. Failure, return error code
-    #  @remarks The API support users to access device information after opening the device，don't support GenTL Devices
-    #        If the device is a GigE camera, there is a blocking risk in calling the interface, so it is not recommended to call the interface during the fetching process. 
+    #  @remarks Call this API after MV_CC_OpenDevice() to get the device information.The API does not support devices created using GenTL device information.
+    #            For a GigE device, there is a blocking risk when calling the API, so it is not recommended to call the API during image grabbing.
     def MV_CC_GetDeviceInfo(self, stDevInfo):
         MvCamCtrldll.MV_CC_GetDeviceInfo.argtype = (c_void_p, c_void_p)
         MvCamCtrldll.MV_CC_GetDeviceInfo.restype = c_uint
         return MvCamCtrldll.MV_CC_GetDeviceInfo(self.handle, byref(stDevInfo))
-
-
 
     ##
     #  @~chinese
@@ -1412,7 +1444,7 @@ class MvCamera():
     #  @brief  导入设备属性并保存错误信息列表
     #  @param  handle                      [IN]            设备句柄/采集卡句柄
     #  @param  strFileName                 [IN]            属性文件名
-    #  @param  stNodeErrorList             [IN OUT]        错误信息列表，由用户在外部申请并由内部填充数据，该参数允许填null代表用户不关心导入时的错误信息
+    #  @param  pstNodeErrorList            [IN OUT]        错误信息列表，由用户在外部申请并由内部填充数据，该参数允许填null代表用户不关心导入时的错误信息
     #  @return 成功，返回MV_OK；错误，返回错误码 
     #  @remarks 部分节点导入失败时，接口返回MV_OK，通过错误信息列表中stNodeError获取出错节点及失败原因
 
@@ -2071,14 +2103,14 @@ class MvCamera():
     #  @param   pstActionCmdInfo           [IN]            动作命令信息
     #  @param   pstActionCmdResults        [IN][OUT]       动作命令返回信息列表
     #  @return 成功，返回MV_OK；错误，返回错误码 
-    #  @remarks 仅GigEVision设备支持。
+    #  @remarks 仅GigEVision设备支持, 支持最多 16 个组播地址同时发送命令。
 
     #  @~english
     #  @brief  Issue Action Command
     #  @param   pstActionCmdInfo           [IN]            Action Command
     #  @param   pstActionCmdResults        [IN][OUT]       Action Command Result List
     #  @return Success, return MV_OK. Failure, return error code
-    #  @remarks This API is supported only by GigEVision camera.
+    #  @remarks This API is Supported only by GigE Vision devices, up to 16 multicast addresses can be used simultaneously to send commands.
     def MV_GIGE_IssueActionCommand(pstActionCmdInfo, pstActionCmdResults):
         MvCamCtrldll.MV_GIGE_IssueActionCommand.argtype = (c_void_p, c_void_p)
         MvCamCtrldll.MV_GIGE_IssueActionCommand.restype = c_uint
@@ -2234,16 +2266,18 @@ class MvCamera():
     #  @~chinese
     #  @brief  设置U3V的传输包大小
     #  @param  handle                      [IN]            设备句柄
-    #  @param  nTransferSize               [IN]            传输的包大小, Byte，默认为1M，rang：>=0x400，建议最大值：[windows] rang <= 0x400000；[Linux] rang <= 0x200000
+    #  @param  nTransferSize               [IN]            传输的包大小, Byte，默认为1M，需4的倍数，rang：>=0x8000，建议最大值：[windows] rang <= 0x400000；[Linux] rang <= 0x200000
     #  @return 成功,返回MV_OK,失败,返回错误码
     #  @remarks 增加传输包大小可以适当降低取流时的CPU占用率。但不同的PC和不同USB扩展卡存在不同的兼容性，如果该参数设置过大可能会出现取不到图像的风险。
+    #           MacOS系统中，传输包大小设置过小，可能导致开始取流接口报前置条件错误，该值和图像大小与传输通道个数有关，无法给出准确的最小值，MacOS系统中尽量不做修改。
 
     #  @~english
     #  @brief  Set transfer size of U3V device
     #  @param  handle                      [IN]            Device handle
-    #  @param  nTransferSize               [IN]            Transfer size，Byte，default：1M，rang：>=0x400，Recommended maximum: [windows] rang <= 0x400000; [Linux] rang <= 0x200000
+    #  @param  nTransferSize               [IN]            It refers to the size of the transmission packet (unit: byte), and the default value is 1 MB (1,048,576 bytes), Multiples of 4. rang: >=0x8000.
     #  @return Success, return MV_OK. Failure, return error code 
-    #  @remarks Increasing the transmission packet size can reduce the CPU utilization at the time of fetching. However, different PCS and different USB extension CARDS have different compatibility, and if this parameter is set too large, there may be the risk of not getting the image.
+    #  @remarks Increasing the packet size can reduce the CPU usage, but for different computers and USB expansion cards, the compatibility is different. If the packet size is too large, image acquisition might fail. 
+    #           On macOS systems, setting the TransferSize too small may cause MV_CC_StartGrabbing to return MV_E_PRECONDITION. This value is related to the image size and TransferWays, so it is not possible to provide an exact minimum value. It is recommended to avoid modifying this setting whenever possible.
     def MV_USB_SetTransferSize(self, nTransferSize):
         MvCamCtrldll.MV_USB_SetTransferSize.argtype = (c_void_p, c_uint)
         MvCamCtrldll.MV_USB_SetTransferSize.restype = c_uint
@@ -2609,7 +2643,7 @@ class MvCamera():
     #  @~english
     #  @brief  Interpolation algorithm type setting
     #  @param  handle                      [IN]            Device handle
-    #  @param  nBayerCvtQuality            [IN]            Bayer interpolation method  0-Fast 1-Equilibrium 2-Optimal
+    #  @param  nBayerCvtQuality            [IN]            Bayer interpolation method  0-Fast 1-Equilibrium 2-Optimal 3-optimal plus
     #  @return Success, return MV_OK. Failure, return error code
     #  @remarks Set the bell interpolation quality parameters of the internal image conversion interface, 
     #           and the interpolation algorithm used in the MV_CC_ConvertPixelTypeEx and MV_CC_GetImageForRGB/BGR interfaces is set by this interface.
@@ -2782,12 +2816,15 @@ class MvCamera():
     #  @param  handle                      [IN]            设备句柄
     #  @param  pstParam                    [IN]            ISP配置参数
     #  @return 成功，返回MV_OK；错误，返回错误码
+    #  @remarks  该接口仅支持windows平台
+
 
     #  @~english
     #  @brief  Set ISP configuration.
     #  @param  handle                      [IN]            Device handle
     #  @param  pstParam                    [IN][OUT]       ISP parameter structure
     #  @return Success, return MV_OK. Failure, return error code
+    #  @remarks This API only supports windows platform.
     def MV_CC_SetISPConfig(self, pstParam):
         MvCamCtrldll.MV_CC_SetISPConfig.argtype = (c_void_p, c_void_p)
         MvCamCtrldll.MV_CC_SetISPConfig.restype = c_uint
@@ -2801,6 +2838,7 @@ class MvCamera():
     #  @param  pstOutputImage              [IN][OUT]       输出图像结构体
     #  @return 成功，返回MV_OK；错误，返回错误码
     #  @remarks 需要先调用MV_CC_SetISPConfig传入配置文件, 配置文件由ISP工具生成
+    #  @        该接口仅支持windows平台
 
     #  @~english
     #  @brief  ISP process.
@@ -2809,6 +2847,8 @@ class MvCamera():
     #  @param  pstOutputImage              [IN][OUT]       Output image structure
     #  @return Success, return MV_OK. Failure, return error code
     #  @remarks The Interface should be called after MV_CC_SetISPConfig.
+    #  @remarks This API only supports windows platform.
+
     def MV_CC_ISPProcess(self, pstInputImage, pstOutputImage):
         MvCamCtrldll.MV_CC_ISPProcess.argtype = (c_void_p, c_void_p, pstOutputImage)
         MvCamCtrldll.MV_CC_ISPProcess.restype = c_uint
@@ -2900,14 +2940,14 @@ class MvCamera():
     #  @param  handle                      [IN]            设备句柄
     #  @param  pstRecordParam              [IN]            录像参数结构体
     #  @return 成功，返回MV_OK；错误，返回错误码 
-    #       该接口最大支持Width#Height为8000#8000大小，否则会导致调用MV_CC_InputOneFrame接口错误。
+    #       该接口最大支持Width*Height为8192*8192,最小支持96*96，否则会导致调用MV_CC_InputOneFrame接口错误。
 
     #  @~english
     #  @brief  Start Record
     #  @param  handle                      [IN]            Device handle
     #  @param  pstRecordParam              [IN]            Record param structure
     #  @return Success, return MV_OK. Failure, return error code
-    #           The maximum supported width # height of this interface is 8000 # 8000, otherwise it will result in calling MV_ CC_ InputOneFrame interface error.
+    #           This interface supports a maximum Width*Height of 8192*8192 and a minimum of 96*96; otherwise, calling the MV_CC_InputOneFrame API will result in an error.
     def MV_CC_StartRecord(self, stRecordParam):
         MvCamCtrldll.MV_CC_StartRecord.argtype = (c_void_p, c_void_p)
         MvCamCtrldll.MV_CC_StartRecord.restype = c_uint
@@ -2918,17 +2958,38 @@ class MvCamera():
     #  @brief  输入录像数据
     #  @param  handle                      [IN]            设备句柄
     #  @param  pstInputFrameInfo           [IN]            录像数据结构体
-    #  @return 成功，返回MV_OK；错误，返回错误码 
+    #  @return 成功，返回MV_OK；错误，返回错误码
+    #  @remarks 不支持HB和JPEG直接输入，需要先解码     
 
     #  @~english
     #  @brief  Input RAW data to Record
     #  @param  handle                      [IN]            Device handle
     #  @param  pstInputFrameInfo           [IN]            Record data structure
     #  @return Success, return MV_OK. Failure, return error code
+    #  @remarks Direct input of HB and JPEG is not supported; decoding is required first.
     def MV_CC_InputOneFrame(self, stInputFrameInfo):
         MvCamCtrldll.MV_CC_InputOneFrame.argtype = (c_void_p, c_void_p)
         MvCamCtrldll.MV_CC_InputOneFrame.restype = c_uint
         return MvCamCtrldll.MV_CC_InputOneFrame(self.handle, byref(stInputFrameInfo))
+
+    ##
+    #  @~chinese
+    #  @brief  输入录像数据
+    #  @param  handle                      [IN]            设备句柄
+    #  @param  pstInputFrameInfo           [IN]            录像数据结构体
+    #  @return 成功，返回MV_OK；错误，返回错误码
+    #  @remarks 支持HB和JPEG直接输入，SDK内部解码 
+
+    #  @~english
+    #  @brief  Input RAW data to Record
+    #  @param  handle                      [IN]            Device handle
+    #  @param  pstInputFrameInfo           [IN]            Record data structure
+    #  @return Success, return MV_OK. Failure, return error code
+    #  @remarks Direct input of HB and JPEG is supported, with decoding handled internally by the SDK.
+    def MV_CC_InputOneFrameEx(self, stInputFrameInfo):
+        MvCamCtrldll.MV_CC_InputOneFrameEx.argtype = (c_void_p, c_void_p)
+        MvCamCtrldll.MV_CC_InputOneFrameEx.restype = c_uint
+        return MvCamCtrldll.MV_CC_InputOneFrameEx(self.handle, byref(stInputFrameInfo))
 
     ##
     #  @~chinese
@@ -2952,22 +3013,18 @@ class MvCamera():
     #  @param  handle                      [IN]            设备句柄
     #  @param  pstReconstructParam         [IN][OUT]       重构图像参数
     #  @return 成功，返回MV_OK，失败，返回错误码。
-    #  @remarks 图像分割支持任意像素格式，图像分割应与线阵相机的“MultiLightControl”节点搭配使用，该节点可设置多个不同的曝光值，如MultiLightControl=2,
-    #        相机会将两个不同曝光值所对应的两张图像交叠合并为一张图像(实际高度为两张图像的高度)发送给上层应用程序，
-    #        调用该接口并传入分时曝光值nExposureNum为2，可将相机发送的一张图像分割为2张图像，这两张图像分别对应一个曝光值。
-    #        若使用普通相机或未打开线阵相机的“MultiLightControl”节点，则图像分割无意义，只是将图像按行分割为2，3，4张图像，
-    #        每张图像的高度变为原图像的1/2，1/3，1/4(由nExposureNum决定)。
+    #  @remarks 使用时，需与线阵相机的分时频闪或分时曝光等场景搭配。假设设置分时曝光节点为2，则相机会将2个不同曝光值所对应的两张图像交叠合并为1张图像（实际高度为2张图像的高度）发送给上层应用程序。 \n
+    #          此时，调用该接口并传入分时曝光值nExposureNum为2，可将相机发送的1张图像分割为2张图像，并且这2张图像分别对应1个曝光值。 \n
+    #          若使用面阵相机或使用线阵相机，但未启用分时曝光/分时频闪功能，则调用该接口进行图像分割是毫无意义的，尤其是Bayer格式，会打乱图像内容。 \n
 
     #  @~english
     #  @brief  Reconstruct Image(For time-division exposure function)
     #  @param  handle                      [IN]            Device handle
     #  @param  pstReconstructParam         [IN][OUT]       Reconstruct image parameters
     #  @return Success, return MV_OK, Failure, return error code.
-    #  @remarks Image segmentation supports any pixel format. Image segmentation should be used with the "MultiLightControl" node of the linear array camera. This node can set multiple different exposure values, such as MultiLightControl=2, 
-    #        The camera will overlap and merge two images corresponding to two different exposure values into one image (the actual height is the height of the two images) and send it to the upper application. 
-    #        Call the interface and pass in nExposureNum is two. One image sent by the camera can be divided into two images, each of which corresponds to an exposure value. 
-    #        If an ordinary camera is used or the "MultiLightControl" node of the linear array camera is not turned on, the image segmentation is meaningless, but the image is divided into 2, 3, and 4 images by line. 
-    #        The height of each image becomes 1/2, 1/3, 1/4 of the original image (determined by nExposureNum).
+    #  @remarks When used, this API must be paired with multi-light control of line scan cameras. If the multi-light exposure node is 2, the camera will reconstruct 2 images with different exposure values into one image (with its height the sum of two images) and send it to the upper layer application.
+    #           If this API is called then and the value of nExposureNum is set to 2, the reconstructed image will be later divided to 2 images with two corresponding exposure values.
+    #           If using an area scan camera or a line scan camera without enabling the multi-light control function, calling this interface for image splitting is meaningless, especially for Bayer format images, as it may disrupt the image content.
     def MV_CC_ReconstructImage(self, stReconstructParam):
         MvCamCtrldll.MV_CC_ReconstructImage.argtype = (c_void_p, c_void_p)
         MvCamCtrldll.MV_CC_ReconstructImage.restype = c_uint
@@ -3083,8 +3140,383 @@ class MvCamera():
         return MvCamCtrldll.MV_CC_SerialPort_Close(self.handle)
     ## @}
     
+
+
+
+    ## @addtogroup  ch: 支持液态镜头的设备接口 | en: API for devices supporting liquid lens 
+    ## @{
+
+    ##
+    #  @~chinese
+    #  @brief  打开液态镜头
+    #  @param  handle                      [IN]            设备句柄
+    #  @param  pstLiquidLensInfo           [OUT]           液态镜头基本信息 (MV_CC_LIQUIDLENS_INFO)
+    #  @return 成功,返回MV_OK,失败,返回错误码
+
+    #  @~english
+    #  @brief  Open the liquid lens
+    #  @param  handle                      [IN]            Device handle
+    #  @param  pstLiquidLensInfo           [OUT]           It refers to the information of liquid lens (MV_CC_LIQUIDLENS_INFO).
+    #  @return Success, return MV_OK. Failure, return error code
+    def MV_CC_LiquidLens_Open(self, pstLiquidLensInfo):
+        MvCamCtrldll.MV_CC_LiquidLens_Open.argtypes = (c_void_p, c_void_p)
+        MvCamCtrldll.MV_CC_LiquidLens_Open.restype = c_uint
+        return MvCamCtrldll.MV_CC_LiquidLens_Open(self.handle, byref(pstLiquidLensInfo))
     
+
+    ##
+    #  @~chinese
+    #  @brief  关闭液态镜头
+    #  @param  handle                      [IN]            设备句柄
+    #  @return 成功，返回MV_OK；错误，返回错误码
+
+    #  @~english
+    #  @brief  Close the liquid lens
+    #  @param  handle                      [IN]            Device handle
+    #  @return Success, return MV_OK. Failure, return error code
+    def MV_CC_LiquidLens_Close(self):
+        MvCamCtrldll.MV_CC_LiquidLens_Close.argtypes = (c_void_p,)
+        MvCamCtrldll.MV_CC_LiquidLens_Close.restype = c_uint
+        return MvCamCtrldll.MV_CC_LiquidLens_Close(self.handle)
+
+    ##
+    #  @~chinese
+    #  @brief  设置光焦度
+    #  @param  handle                      [IN]            设备句柄
+    #  @param  nFocalPower                 [IN]            光焦度值
+    #  @param  nTriggerEnable              [IN]            是否触发相机，0-不触发， 非0-触发
+    #  @return 成功,返回MV_OK,失败,返回错误码
+    #  @remarks 当nTriggerEnable不为0时，用户需要先把相机设置为软触发模式，接口调用后，相机将触发一帧图像，否则无法出图。
+
+    #  @~english
+    #  @brief  Sets the focal power of liquid lens.
+    #  @param  handle                      [IN]            Device handle
+    #  @param  nFocalPower                 [IN]            It refers to the focal power value.
+    #  @param  nTriggerEnable              [IN]            It refers to whether to trigger the camera. 0: not trigger; non-zero: trigger.
+    #  @return Success, return MV_OK. Failure, return error code
+    #  @remarks When nTriggerEnable is not 0, the user needs to set the camera to software trigger mode first. After calling this API, the camera will trigger one frame of image. Otherwise, the camera will not output images.
+    def MV_CC_LiquidLens_SetFocalPower(self,  nFocalPower, nTriggerEnable):
+        MvCamCtrldll.MV_CC_LiquidLens_SetFocalPower.argtypes = (c_void_p,  c_int, c_int)
+        MvCamCtrldll.MV_CC_LiquidLens_SetFocalPower.restype = c_uint
+        return MvCamCtrldll.MV_CC_LiquidLens_SetFocalPower(self.handle,  nFocalPower, nTriggerEnable)
+
+
+    ##
+    #  @~chinese
+    #  @brief  获取光焦度信息
+    #  @param  handle                      [IN]           设备句柄
+    #  @param  pnFocalPower               [OUT]           当前光焦度
+    #  @return 成功,返回MV_OK,失败,返回错误码
+
+    #  @~english 
+    #  @brief   Gets the focal power information of liquid lens.
+    #  @param  handle                      [IN]            Device handle
+    #  @param  pnFocalPower               [OUT]            Current focal power
+    #  @return Success, return MV_OK. Failure, return error code
+    def MV_CC_LiquidLens_GetFocalPower(self, pnFocalPower):
+        MvCamCtrldll.MV_CC_LiquidLens_GetFocalPower.argtypes = (c_void_p, c_void_p)
+        MvCamCtrldll.MV_CC_LiquidLens_GetFocalPower.restype = c_uint
+        return MvCamCtrldll.MV_CC_LiquidLens_GetFocalPower(self.handle, byref(pnFocalPower))
     
+
+
+    ##
+    #  @~chinese
+    #  @brief  执行自动对焦
+    #  @param  handle                      [IN]            设备句柄
+    #  @param  pstAutoFocusParam           [IN]            自动对焦参数 (MV_CC_LIQUIDLENS_AUTOFOCUS_PARAM)
+    #  @param  nOutputImage                [IN]            对焦过程中是否输出图像，0: 丢弃对焦过程中的图像，非0：保留对焦过程中的图像，用户可以通过注册回调或者MV_CC_GetImageBuffer主动获取图像
+    #  @param  pnResultFocalPower          [OUT]           最佳清晰位置的光焦度值
+    #  @return 成功,返回MV_OK,失败,返回错误码
+    #  @remarks  当nOutputImage非0时，在对焦前建议增大图像缓存节点个数，以免丢帧。
+    #            对焦过程中会将相机切换成软触发模式，对焦结束后，会将触发模式恢复到对焦前的设定
+    #            为了提高对焦的有效性，对焦前请确保对焦画面亮度均匀
+
+    #  @~english
+    #  @brief  Executes auto focus for liquid lens. 
+    #  @param  handle                      [IN]            Device handle
+    #  @param  pstAutoFocusParam           [IN]            It refers to the auto focus parameters. (MV_CC_LIQUIDLENS_AUTOFOCUS_PARAM)
+    #  @param  nOutputImage                [IN]            It refers to whether to output images during auto focus.   0: discard images during auto focus; non-zero: retain images during auto focus. Users can actively obtain images by registering callback or calling MV_CC_GetImageBuffer.
+    #  @param  pnResultFocalPower          [OUT]           It refers to the focal power value at the best focus position.
+    #  @return Success, return MV_OK. Failure, return error code
+    #  @remarks  When nOutputImage is not 0, it is recommended to increase the number of image buffer nodes before focusing to avoid frame loss。
+    #            During auto focus, the camera will be switched to software trigger mode. After auto focus is completed, the trigger mode will be restored to the setting before auto focus.
+    #            To improve the effectiveness of auto focus, please ensure the focus image brightness is uniform before focusing
+    def MV_CC_LiquidLens_AutoFocus(self, pstAutoFocusParam, nOutputImage, pnResultFocalPower):
+        MvCamCtrldll.MV_CC_LiquidLens_AutoFocus.argtypes = (c_void_p, c_void_p, c_int, c_void_p)
+        MvCamCtrldll.MV_CC_LiquidLens_AutoFocus.restype = c_uint
+        return MvCamCtrldll.MV_CC_LiquidLens_AutoFocus(self.handle,  byref(pstAutoFocusParam), nOutputImage, byref(pnResultFocalPower))
+    
+	
+    ##
+    #  @~chinese
+    #  @brief  执行光焦度区间扫描
+    #  @param  handle                      [IN]            设备句柄
+    #  @param  pstRangeScanParam           [IN]            区间扫描参数 (MV_CC_LIQUIDLENS_RANGE_SCAN_PARAM)
+    #  @param  cbLiquidLensMsg             [IN]            回调通知消息
+    #  @param  pUser                       [IN]            用户指针
+    #  @return 成功,返回MV_OK,失败,返回错误码
+    #  @remarks  调用接口前需要用户先把相机设置为软触发模式，否则扫描过程中相机无法触发出图。相机触发出图的时机受触发延迟时间的影响，可以通过MV_CC_LiquidLens_SetTriggerDelayTime接口设置。
+    #            在回调中可以获取到光焦度变化事件和扫描结束事件，如果是光焦度变化事件，消息数据返回的是当前光焦度值.
+    #            注意：请勿在回调函数中执行耗时操作，否则会阻塞串口数据的读写，影响设备通信性能。
+
+
+    #  @~english
+    #  @brief  Executes focal power range scan for liquid lens.  
+    #  @param  handle                      [IN]            Device handle
+    #  @param  pstRangeScanParam           [IN]            It refers to the range scan parameters.
+    #  @param  cbLiquidLensMsg             [IN]            It refers to the callback function for liquid lens messages.
+    #  @param  pUser                       [IN]            It refers to the user-defined variable.
+    #  @return Success, return MV_OK. Failure, return error code
+    #  @remarks  Before calling this API, the user needs to set the camera to software trigger mode first. Otherwise, the camera cannot trigger and output images during the scan process. 
+    #            The timing of camera trigger image output is affected by the trigger delay time, which can be set through the MV_CC_LiquidLens_SetTriggerDelayTime API
+    #            In the callback, you can obtain focal power change events and scan end events. If it is a focal power change event, the message data returns the current focal power value.
+    #            Note: Do not perform time-consuming operations in the callback function, otherwise it will block serial port data read/write and affect device communication performance.
+
+    def MV_CC_LiquidLens_FocalPowerRangeScan(self, pstRangeScanParam, cbLiquidLensMsg, pUser):
+        MvCamCtrldll.MV_CC_LiquidLens_FocalPowerRangeScan.argtypes = (c_void_p, c_void_p, MvLiquidLensMsgCallback, c_void_p)
+        MvCamCtrldll.MV_CC_LiquidLens_FocalPowerRangeScan.restype = c_uint
+
+        # 将Python回调函数转换为C回调函数
+        c_callback = MvLiquidLensMsgCallback(cbLiquidLensMsg)
+            
+        # 保存回调函数引用，避免被垃圾回收
+        self.c_LiquidLensRangeScanMsgCallback = c_callback
+
+        return MvCamCtrldll.MV_CC_LiquidLens_FocalPowerRangeScan(self.handle, byref(pstRangeScanParam), c_callback,  pUser)
+
+
+    ##
+    #  @~chinese
+    #  @brief  执行多焦度轮询
+    #  @param  handle                      [IN]            设备句柄
+    #  @param  pstMultiFPScanParam         [IN]            多焦度轮询参数 (MV_CC_LIQUIDLENS_MULTI_FP_SCAN_PARAM)
+    #  @param  cbLiquidLensMsg             [IN]            液态镜头上传消息回调函数
+    #  @param  pUser                       [IN]            用户指针
+    #  @return 成功,返回MV_OK,失败,返回错误码
+    #  @remarks  调用接口前需要用户先把相机设置为软触发模式，否则扫描过程中相机无法触发出图。相机触发出图的时机受触发延迟时间的影响，可以通过MV_CC_LiquidLens_SetTriggerDelayTime接口设置。
+    #             在回调中可以获取到光焦度变化事件和扫描结束事件，如果是光焦度变化事件，消息数据返回的是当前光焦度值
+    #            注意：请勿在回调函数中执行耗时操作，否则会阻塞串口数据的读写，影响设备通信性能。
+    
+    #  @~english
+    #  @brief  Executes multi focal power scan for liquid lens 
+    #  @param  handle                      [IN]            Device handle
+    #  @param  pstMultiFPScanParam         [IN]            It refers to the multi focal power scan parameters (MV_CC_LIQUIDLENS_MULTI_FP_SCAN_PARAM)
+    #  @param  cbLiquidLensMsg             [IN]            It refers to the callback function for liquid lens messages.  
+    #  @param  pUser                       [IN]            It refers to the user-defined variable.
+    #  @return Success, return MV_OK. Failure, return error code
+    #  @remarks  Before calling this API, the user needs to set the camera to software trigger mode first. Otherwise, the camera cannot trigger and output images during the scan process
+    #            The timing of camera trigger image output is affected by the trigger delay time, which can be set through the MV_CC_LiquidLens_SetTriggerDelayTime API.
+    #            In the callback, you can obtain focal power change events and scan end events. If it is a focal power change event, the message data returns the current focal power value
+    #            Note: Do not perform time-consuming operations in the callback function, otherwise it will block serial port data read/write and affect device communication performance.
+    def MV_CC_LiquidLens_MultiFocalPowerScan(self, pstMultiFPScanParam, cbLiquidLensMsg, pUser):
+        MvCamCtrldll.MV_CC_LiquidLens_MultiFocalPowerScan.argtypes = (c_void_p, c_void_p, MvLiquidLensMsgCallback, c_void_p)
+        MvCamCtrldll.MV_CC_LiquidLens_MultiFocalPowerScan.restype = c_uint
+
+        # 将Python回调函数转换为C回调函数
+        c_callback = MvLiquidLensMsgCallback(cbLiquidLensMsg)
+            
+        # 保存回调函数引用，避免被垃圾回收
+        self.c_LiquidLensFocalPowerMsgCallback = c_callback
+        return MvCamCtrldll.MV_CC_LiquidLens_MultiFocalPowerScan(self.handle,  byref(pstMultiFPScanParam), c_callback, pUser)
+
+
+    ##
+    #  @~chinese
+    #  @brief  设置触发延时
+    #  @param  handle                      [IN]            设备句柄
+    #  @param  nDelayTimeMs                [IN]            触发延迟时间
+    #  @return 成功,返回MV_OK,失败,返回错误码
+    #  @remarks  触发延迟时间决定相机触发出图的时机，比如发送设置光焦度命令后，等待一个触发延迟时间后，再触发出图（如果需要）
+
+    #  @~english
+    #  @brief   Sets the trigger delay time for liquid lens.
+    #  @param  handle                      [IN]            Device handle
+    #  @param  nDelayTimeMs                [IN]            It refers to the trigger delay time, unit: millisecond.
+    #  @return Success, return MV_OK. Failure, return error code
+    #  @remarks  The trigger delay time determines when the camera triggers to output images. For example, after sending a focal power setting command, wait for the trigger delay time before triggering image output (if needed).
+    def MV_CC_LiquidLens_SetTriggerDelayTime(self,  nDelayTimeMs):
+        MvCamCtrldll.MV_CC_LiquidLens_SetTriggerDelayTime.argtypes = (c_void_p,  c_uint)
+        MvCamCtrldll.MV_CC_LiquidLens_SetTriggerDelayTime.restype = c_uint
+        return MvCamCtrldll.MV_CC_LiquidLens_SetTriggerDelayTime(self.handle,  c_uint(nDelayTimeMs))
+
+
+
+    ##
+    #  @~chinese
+    #  @brief  获取触发延时
+    #  @param  handle                      [IN]            设备句柄
+    #  @param  pnDelayTimeMs               [IN][OUT]       触发延迟时间
+    #  @return 成功，返回MV_OK；错误，返回错误码 
+
+    #  @~english
+    #  @brief  Gets the trigger delay time for liquid lens.
+    #  @param  handle                      [IN]            Device handle
+    #  @param  pnDelayTimeMs               [IN][OUT]       Delay time in ms
+    #  @return Success, return MV_OK. Failure, return error code
+    def MV_CC_LiquidLens_GetTriggerDelayTime(self, pnDelayTimeMs):
+        MvCamCtrldll.MV_CC_LiquidLens_GetTriggerDelayTime.argtypes = (c_void_p, c_void_p)
+        MvCamCtrldll.MV_CC_LiquidLens_GetTriggerDelayTime.restype = c_uint
+        return MvCamCtrldll.MV_CC_LiquidLens_GetTriggerDelayTime(self.handle, byref(pnDelayTimeMs))
+
+
+    ##
+    #  @~chinese
+    #  @brief  保存参数到指定用户集
+    #  @param  handle                      [IN]            设备句柄
+    #  @param  enUserSet                   [IN]            用户集
+    #  @return 成功，返回MV_OK；错误，返回错误码 
+
+    #  @~english
+    #  @brief  Saves parameters to the specified user set of liquid lens.
+    #  @param  handle                      [IN]            Device handle
+    #  @param  enUserSet                   [IN]            It refers to the user set.
+    #  @return Success, return MV_OK. Failure, return error code
+    def MV_CC_LiquidLens_SaveUserSet(self, enUserSet):
+        MvCamCtrldll.MV_CC_LiquidLens_SaveUserSet.argtypes = (c_void_p, c_uint)
+        MvCamCtrldll.MV_CC_LiquidLens_SaveUserSet.restype = c_uint
+        return MvCamCtrldll.MV_CC_LiquidLens_SaveUserSet(self.handle, enUserSet)
+
+
+
+    ##
+    #  @~chinese
+    #  @brief  获取当前用户集
+    #  @param  handle                      [IN]            设备句柄
+    #  @param  penUserSet                  [IN][OUT]       用户集 (MV_CC_LIQUIDLENS_USERSET)
+    #  @return 成功，返回MV_OK；错误，返回错误码 
+
+    #  @~english
+    #  @brief  Gets the current user set of liquid lens.
+    #  @param  handle                      [IN]            Device handle
+    #  @param  penUserSet                  [IN][OUT]       It refers to the current user set.
+    #  @return Success, return MV_OK. Failure, return error code
+    def MV_CC_LiquidLens_GetCurrentUserSet(self, penUserSet):
+        MvCamCtrldll.MV_CC_LiquidLens_GetCurrentUserSet.argtypes = (c_void_p, c_void_p)
+        MvCamCtrldll.MV_CC_LiquidLens_GetCurrentUserSet.restype = c_uint
+        return MvCamCtrldll.MV_CC_LiquidLens_GetCurrentUserSet(self.handle, byref(penUserSet))
+
+
+    ##
+    #  @~chinese
+    #  @brief  加载指定用户集
+    #  @param  handle                      [IN]            设备句柄
+    #  @param  enUserSet                   [IN]            用户集 (MV_CC_LIQUIDLENS_USERSET)
+    #  @return 成功，返回MV_OK；错误，返回错误码 
+
+    #  @~english
+    #  @brief  Loads the specified user set for liquid lens. 
+    #  @param  handle                      [IN]            Device handle
+    #  @param  enUserSet                   [IN]            It refers to the user set. (MV_CC_LIQUIDLENS_USERSET)
+    #  @return Success, return MV_OK. Failure, return error code
+    def MV_CC_LiquidLens_LoadUserSet(self, enUserSet):
+        MvCamCtrldll.MV_CC_LiquidLens_LoadUserSet.argtypes = (c_void_p, c_uint)
+        MvCamCtrldll.MV_CC_LiquidLens_LoadUserSet.restype = c_uint
+        return MvCamCtrldll.MV_CC_LiquidLens_LoadUserSet(self.handle, enUserSet)
+
+
+    ##
+    #  @~chinese
+    #  @brief  设置默认用户集
+    #  @param  handle                      [IN]            设备句柄
+    #  @param  enUserSet                   [IN]            用户集 (MV_CC_LIQUIDLENS_USERSET)
+    #  @return 成功，返回MV_OK；错误，返回错误码 
+
+    #  @~english
+    #  @brief  Sets the default user set for liquid lens.
+    #  @param  handle                      [IN]            Device handle
+    #  @param  enUserSet                   [IN]            It refers to the user set.(MV_CC_LIQUIDLENS_USERSET)
+    #  @return Success, return MV_OK. Failure, return error code
+    def MV_CC_LiquidLens_SetDefaultUserSet(self, enUserSet):
+        MvCamCtrldll.MV_CC_LiquidLens_SetDefaultUserSet.argtypes = (c_void_p, c_uint)
+        MvCamCtrldll.MV_CC_LiquidLens_SetDefaultUserSet.restype = c_uint
+        return MvCamCtrldll.MV_CC_LiquidLens_SetDefaultUserSet(self.handle, enUserSet)
+
+
+    ##
+    #  @~chinese
+    #  @brief  获取默认用户集
+    #  @param  handle                      [IN]            设备句柄
+    #  @param  penUserSet                  [IN][OUT]       用户集(MV_CC_LIQUIDLENS_USERSET)
+    #  @return 成功，返回MV_OK；错误，返回错误码 
+
+    #  @~english
+    #  @brief   Gets the default user set of liquid lens
+    #  @param  handle                      [IN]            Device handle
+    #  @param  penUserSet                  [IN][OUT]       It refers to the default user set. (MV_CC_LIQUIDLENS_USERSET)
+    #  @return Success, return MV_OK. Failure, return error code
+    def MV_CC_LiquidLens_GetDefaultUserSet(self, penUserSet):
+        MvCamCtrldll.MV_CC_LiquidLens_GetDefaultUserSet.argtypes = (c_void_p, c_void_p)
+        MvCamCtrldll.MV_CC_LiquidLens_GetDefaultUserSet.restype = c_uint
+        return MvCamCtrldll.MV_CC_LiquidLens_GetDefaultUserSet(self.handle, byref(penUserSet))
+
+
+    ##
+    #  @~chinese
+    #  @brief  设置液态镜头温度变化检测时间间隔
+    #  @param  handle                      [IN]            设备句柄
+    #  @param  nIntervalSeconds            [IN]            检测时间间隔（单位：秒）
+    #  @return 成功，返回MV_OK；错误，返回错误码 
+
+    #  @~english
+    #  @brief   Set temperature detection interval for liquid lens
+    #  @param  handle                      [IN]            Device handle
+    #  @param  nIntervalSeconds            [IN]            Detection interval in seconds
+    #  @return Success, return MV_OK. Failure, return error code
+    def MV_CC_LiquidLens_SetTempDetectInterval(self, nIntervalSeconds):
+        MvCamCtrldll.MV_CC_LiquidLens_SetTempDetectInterval.argtypes = (c_void_p, c_uint)
+        MvCamCtrldll.MV_CC_LiquidLens_SetTempDetectInterval.restype = c_uint
+        return MvCamCtrldll.MV_CC_LiquidLens_SetTempDetectInterval(self.handle, nIntervalSeconds)
+
+
+
+    ##
+    #  @~chinese
+    #  @brief  获取液态镜头温度变化检测时间间隔
+    #  @param  handle                      [IN]            设备句柄
+    #  @param  pnIntervalSeconds           [IN][OUT]       检测时间间隔（单位：秒）
+    #  @return 成功，返回MV_OK；错误，返回错误码 
+
+    #  @~english
+    #  @brief   Get temperature detection interval for liquid lens
+    #  @param  handle                      [IN]            Device handle
+    #  @param  pnIntervalSeconds           [IN][OUT]       Detection interval in seconds     
+    #  @return Success, return MV_OK. Failure, return error code
+    def MV_CC_LiquidLens_GetTempDetectInterval(self, pnIntervalSeconds):
+        MvCamCtrldll.MV_CC_LiquidLens_GetTempDetectInterval.argtypes = (c_void_p, c_void_p)
+        MvCamCtrldll.MV_CC_LiquidLens_GetTempDetectInterval.restype = c_uint
+        return MvCamCtrldll.MV_CC_LiquidLens_GetTempDetectInterval(self.handle, byref(pnIntervalSeconds))
+
+
+    ##
+    #  @~chinese
+    #  @brief  注册液态镜头异常事件回调接口
+    #  @param  handle                      [IN]     设备句柄
+    #  @param  cbLiquidLensException       [IN]     异常事件回调函数指针
+    #  @param  pUser                       [IN]     用户自定义数据
+    #  @return 成功，返回MV_OK；错误，返回错误码 
+    #  @remarks 镜头发送异常时，可以在回调里面获取到异常消息，比如镜头异常断开。
+
+    #  @~english
+    #  @brief   Register liquid lens exception event callback interface
+    #  @param  handle                      [IN]        Device handle
+    #  @param  cbLiquidLensException       [IN]        Exception event callback function pointer
+    #  @param  pUser                       [IN]        User defined data
+    #  @return Success, return MV_OK. Failure, return error code
+    #  @remarks When the lens encounters exceptions, you can obtain the exception information through the callback, such as obtaining the exception message after the lens is abnormally disconnected.
+    def MV_CC_LiquidLens_RegisterExceptionCallBack(self, cbLiquidLensException, pUser):
+        MvCamCtrldll.MV_CC_LiquidLens_RegisterExceptionCallBack.argtypes = (c_void_p, MvLiquidLensExceptionCallback, c_void_p)
+        MvCamCtrldll.MV_CC_LiquidLens_RegisterExceptionCallBack.restype = c_uint
+        
+        # 将Python回调函数转换为C回调函数
+        c_callback = MvLiquidLensExceptionCallback(cbLiquidLensException)
+    
+        # 保存回调函数引用，避免被垃圾回收
+        self.c_LiquidLensExceptionCallback = c_callback
+        return MvCamCtrldll.MV_CC_LiquidLens_RegisterExceptionCallBack(self.handle, c_callback, pUser)
+
+
+    ## @}
     '''
     1. 暂不提供外部注册缓存相关API
     2. Part ch: 下面为不推荐使用的API | en: Below are the APIs that are not recommended for use
@@ -3216,4 +3648,3 @@ class MvCamera():
         MvCamCtrldll.MV_USB_RegisterStreamExceptionCallBack.argtype = (c_void_p, c_void_p, c_void_p)
         MvCamCtrldll.MV_USB_RegisterStreamExceptionCallBack.restype = c_uint
         return MvCamCtrldll.MV_USB_RegisterStreamExceptionCallBack(self.handle, CallBackFun, pUser)
-

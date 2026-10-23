@@ -22,4 +22,4 @@ from .MvCameraControl_class import *
 
 __all__ = ["MvErrorDefine_const", "MvISPErrorDefine_const","PixelType_header", "CameraParams_const", "CameraParams_header",  "MvCameraControl_class"]
 
-__version__ = '4.6.0.1'
+__version__ = '4.8.0.1'

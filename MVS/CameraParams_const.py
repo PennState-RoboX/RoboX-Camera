@@ -3,10 +3,10 @@
 
 ## @~chinese 设备类型定义    @~english Device Type Definition
 MV_UNKNOW_DEVICE                             = 0x00000000  ## @~chinese 未知设备类型，保留意义       @~english Unknown Device Type, Reserved
-MV_GIGE_DEVICE                               = 0x00000001  ## @~chinese GigE设备                     @~english GigE Device
+MV_GIGE_DEVICE                               = 0x00000001  ## @~chinese GigE Version设备            @~english GigE Device
 MV_1394_DEVICE                               = 0x00000002  ## @~chinese 1394-a/b 设备                @~english 1394-a/b Device
-MV_USB_DEVICE                                = 0x00000004  ## @~chinese USB 设备                     @~english USB Device
-MV_CAMERALINK_DEVICE                         = 0x00000008  ## @~chinese CameraLink设备               @~english CameraLink Device
+MV_USB_DEVICE                                = 0x00000004  ## @~chinese USB3 Version 设备            @~english USB Device
+MV_CAMERALINK_DEVICE                         = 0x00000008  ## @~chinese 串口设备(包含 CameraLink 和光源控制器设备)               @~english CameraLink Device
 MV_VIR_GIGE_DEVICE                           = 0x00000010  ## @~chinese 虚拟GigE设备               @~english Virtual GigE Device
 MV_VIR_USB_DEVICE                            = 0x00000020  ## @~chinese 虚拟USB设备                @~english Virtual USB Device
 MV_GENTL_GIGE_DEVICE                         = 0x00000040  ## @~chinese 自研网卡下GigE设备          @~english GenTL GigE Device
@@ -30,12 +30,15 @@ INFO_MAX_BUFFER_SIZE                         = 64          ## @~chinese 最大�
 MV_MAX_TLS_NUM                               = 8           ## @~chinese 最多支持的传输层实例个数     @~english The maximum number of supported transport layer instances
 MV_MAX_DEVICE_NUM                            = 256         ## @~chinese 最大支持的设备个数           @~english The maximum number of supported devices
 
-MV_MAX_INTERFACE_NUM                         = 64          #< \~chinese 最大支持的采集卡数量  @~english The maximum number of Frame Grabber interface supported
+MV_MAX_INTERFACE_NUM                         = 64          #@ @~chinese 最大支持的采集卡数量  @~english The maximum number of Frame Grabber interface supported
 
 MV_MAX_SERIAL_PORT_NUM                       = 64          ## @~chinese 最大支持的串口数量  @~english The maximum number of serial port supported
 
 MV_MAX_GENTL_IF_NUM                          = 256         ## @~chinese 最大支持的GenTL数量          @~english The maximum number of GenTL supported
 MV_MAX_GENTL_DEV_NUM                         = 256         ## @~chinese 最大支持的GenTL设备数量      @~english The maximum number of GenTL devices supported
+
+MV_MAX_FOCALPOWER_NUM                        =  32         ## @~chinese 最大变焦次数              @~english      Maximum Number of Zooms
+
 
 ## @~chinese 设备的访问模式    @~english Device Access Mode
 ## @~chinese 独占权限，其他APP只允许读CCP寄存器                        @~english Exclusive authority, other APP is only allowed to read the CCP register

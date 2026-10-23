@@ -80,11 +80,11 @@ MV_ALG_E_DENOISE_NE_BIN_NUM           = 0x10402006  ## @~chinese噪声曲线柱�
 MV_ALG_E_DENOISE_NE_INIT_GAIN         = 0x10402007  ## @~chinese噪声估计初始化增益设置错误
 MV_ALG_E_DENOISE_NE_NOT_INIT          = 0x10402008  ## @~chinese噪声估计未初始化
 MV_ALG_E_DENOISE_COLOR_MODE           = 0x10402009  ## @~chinese颜色空间模式错误
-MV_ALG_E_DENOISE_ROI_NUM              = 0x1040200a  ## @~chinese图像ROI个数错误
-MV_ALG_E_DENOISE_ROI_ORI_PT           = 0x1040200b  ## @~chinese图像ROI原点错误
-MV_ALG_E_DENOISE_ROI_SIZE             = 0x1040200c  ## @~chinese图像ROI大小错误
-MV_ALG_E_DENOISE_GAIN_NOT_EXIST       = 0x1040200d  ## @~chinese输入的相机增益不存在(增益个数已达上限)
-MV_ALG_E_DENOISE_GAIN_BEYOND_RANGE    = 0x1040200e  ## @~chinese输入的相机增益不在范围内
+MV_ALG_E_DENOISE_ROI_NUM              = 0x1040200A  ## @~chinese图像ROI个数错误
+MV_ALG_E_DENOISE_ROI_ORI_PT           = 0x1040200B  ## @~chinese图像ROI原点错误
+MV_ALG_E_DENOISE_ROI_SIZE             = 0x1040200C  ## @~chinese图像ROI大小错误
+MV_ALG_E_DENOISE_GAIN_NOT_EXIST       = 0x1040200D  ## @~chinese输入的相机增益不存在(增益个数已达上限)
+MV_ALG_E_DENOISE_GAIN_BEYOND_RANGE    = 0x1040200E  ## @~chinese输入的相机增益不在范围内
 MV_ALG_E_DENOISE_NP_BUF_SIZE          = 0x1040200f  ## @~chinese输入的噪声特性内存大小错误
 
 ## @~chinese 去紫边特有错误码
