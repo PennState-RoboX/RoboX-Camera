@@ -106,8 +106,29 @@ MV_TRIGGER_SOURCE_LINE1 = 1                      ## @~chinese LINE1 触发源   
 MV_TRIGGER_SOURCE_LINE2 = 2                      ## @~chinese LINE2 触发源                             @~english Trigger source line2
 MV_TRIGGER_SOURCE_LINE3 = 3                      ## @~chinese LINE3 触发源                             @~english Trigger source line3
 MV_TRIGGER_SOURCE_COUNTER0 = 4                   ## @~chinese 触发源计数器                             @~english Trigger source conuter
+MV_TRIGGER_SOURCE_LINE4     = 5                  ## @~chinese Line4                                    @~english Line4
+MV_TRIGGER_SOURCE_EncoderModuleOut  = 6           ## @~chinese EncoderModuleOut                       @~english EncoderModuleOut
 MV_TRIGGER_SOURCE_SOFTWARE = 7                   ## @~chinese 软触发                                   @~english Trigger source software
 MV_TRIGGER_SOURCE_FrequencyConverter = 8         ## @~chinese 触发源变频器                             @~english Trigger source frequency converter
+MV_TRIGGER_SOURCE_CCC1 = 9                       ## @~chinese CC1                                     @~english CC1
+MV_TRIGGER_SOURCE_Action2 = 10                   ## @~chinese 动作2                                    @~english Action2
+MV_TRIGGER_SOURCE_CCC2 = 11                      ## @~chinese CC2                                    @~english CC2
+MV_TRIGGER_SOURCE_CCC3 = 12                      ## @~chinese CC3                                  @~english CC3
+MV_TRIGGER_SOURCE_CCC4 = 13                      ## @~chinese CC4                                     @~english CC4
+
+MV_TRIGGER_SOURCE_LINE5 = 14                      ## @~chinese Line5                        @~english Line5
+MV_TRIGGER_SOURCE_LINE6 = 15                      ## @~chinese Line6                        @~english Line6
+MV_TRIGGER_SOURCE_LINE7 = 16                      ## @~chinese Line7                        @~english Line7
+MV_TRIGGER_SOURCE_LINE8 = 17                      ## @~chinese Line8                        @~english Line8
+MV_TRIGGER_SOURCE_LINE9 = 18                      ## @~chinese Line9                        @~english Line9
+MV_TRIGGER_SOURCE_LINE10 = 19                     ## @~chinese Line10                        @~english Line10
+MV_TRIGGER_SOURCE_LINE11 = 20                     ## @~chinese Line11                       @~english Line11
+
+MV_TRIGGER_SOURCE_Action1 = 22                   ## @~chinese 动作1                       @~english Action1
+MV_TRIGGER_SOURCE_Action3 = 23                   ## @~chinese 动作3                       @~english Action3
+MV_TRIGGER_SOURCE_Action4 = 24                  ## @~chinese 动作4                       @~english Action4
+
+MV_TRIGGER_SOURCE_Anyway = 25                    ## @~chinese 多路                         @~english Anyway
 
 
 ## @~chinese   图像扩展信息的类型 MV_FRAME_EXTRA_INFO_TYPE     @~english  Image Extended Information Type: MV_FRAME_EXTRA_INFO_TYPE
@@ -156,18 +177,18 @@ MV_GIGE_TRANSTYPE_MULTICAST_WITHOUT_RECV = 65537 ## @~chinese 表示组播模式
 
 
 ## @~chinese  每个节点对应的接口类型    @~english Interface type corresponds to each node 
-IFT_IValue = 0                                   ## @~chinese IValue接口类型                  @~english IValue interface
-IFT_IBase = 1                                    ## @~chinese IBase接口类型                   @~english IBase interface
-IFT_IInteger = 2                                 ## @~chinese IInteger接口类型                @~english IInteger interface
-IFT_IBoolean = 3                                 ## @~chinese IBoolean接口类型                @~english IBoolean interface
-IFT_ICommand = 4                                 ## @~chinese ICommand接口类型                @~english ICommand interface
-IFT_IFloat = 5                                   ## @~chinese IFloat接口类型                  @~english IFloat interface
-IFT_IString = 6                                  ## @~chinese IString接口类型                 @~english IString interface
-IFT_IRegister = 7                                ## @~chinese IRegister接口类型               @~english IRegister interface
-IFT_ICategory = 8                                ## @~chinese ICategory接口类型               @~english ICategory interface
-IFT_IEnumeration = 9                             ## @~chinese IEnumeration接口类型            @~english IEnumeration interface
-IFT_IEnumEntry = 10                              ## @~chinese IEnumEntry接口类型              @~english IEnumEntry interface
-IFT_IPort = 11                                   ## @~chinese IPort接口类型                   @~english IPort interface
+IFT_IValue = 0                                   ## @~chinese 值类型                  @~english IValue interface
+IFT_IBase = 1                                    ## @~chinese 通用类型                   @~english IBase interface
+IFT_IInteger = 2                                 ## @~chinese 整形                @~english IInteger interface
+IFT_IBoolean = 3                                 ## @~chinese 布尔型                @~english IBoolean interface
+IFT_ICommand = 4                                 ## @~chinese 命令型                @~english ICommand interface
+IFT_IFloat = 5                                   ## @~chinese 浮点型                  @~english IFloat interface
+IFT_IString = 6                                  ## @~chinese 字符串型                 @~english IString interface
+IFT_IRegister = 7                                ## @~chinese 寄存器型               @~english IRegister interface
+IFT_ICategory = 8                                ## @~chinese 类别型               @~english ICategory interface
+IFT_IEnumeration = 9                             ## @~chinese 枚举型            @~english IEnumeration interface
+IFT_IEnumEntry = 10                              ## @~chinese 枚举条目              @~english IEnumEntry interface
+IFT_IPort = 11                                   ## @~chinese 端口型                   @~english IPort interface
 
 ## @~chinese  节点的访问模式            @~english Node Access Mode
 AM_NI = 0                                        ## @~chinese 没有实现                          @~english Not implemented
@@ -189,6 +210,26 @@ MVCC_NODE_ERR_OTHER         = 100       ## @~chinese  其它错误,可查阅日�
 
 ## @~chinese   图像重构的方式        @~english Image reconstruction method
 MV_SPLIT_BY_LINE = 1                            #< \~chinese 源图像按行拆分成多张图像         @~english Source image split into multiple images by line
+
+
+## @~chinese 液态镜头正常事件类型
+MV_CC_LIQUIDLENS_MSG_FOCAL_POWER_CHANGE = 1           ## @~chinese 光焦度变化          @~english Focal power change
+MV_CC_LIQUIDLENS_MSG_RANGE_SCAN_COMPLETED = 2         ## @~chinese 光焦度区间扫描结束  @~english Range scan completed
+MV_CC_LIQUIDLENS_MSG_MULTI_FP_SCAN_COMPLETED = 3      ## @~chinese 多光焦度扫描结束    @~english  Multi focal power scan completed
+
+
+## @~chinese 液态镜头异常事件类型  @~english  LiquidLens exception event type
+MV_CC_LIQUIDLENS_EXCEPTION_OFFLINE = 1          ## @~chinese 液态镜头掉线        @~english   Liquid lens offline
+MV_CC_LIQUIDLENS_EXCEPTION_RECONNECTED =2       ## @~chinese 液态镜头重新上线    @~english   Liquid lens reconnected
+
+
+## @~chinese MV_CC_LIQUIDLENS_USERSET 液态镜头用户集   @~english   LiquidLens user set
+MV_CC_LIQUIDLENS_DEFAULT = 0               ## @~chinese 默认用户集      @~english    Default user set
+MV_CC_LIQUIDLENS_USERSET1 = 1              ## @~chinese userset1        @~english    User set 1
+MV_CC_LIQUIDLENS_USERSET2 = 2              ## @~chinese userset2        @~english    User set 2
+MV_CC_LIQUIDLENS_USERSET3 = 3              ## @~chinese userset3        @~english    User set 3
+
+
 
 int8_t = c_int8
 int16_t = c_int16
@@ -250,7 +291,10 @@ _MV_GIGE_DEVICE_INFO_._fields_ = [
     ('chSerialNumber', c_ubyte * 16),             ## @~chinese 序列号             @~english serial number
     ('chUserDefinedName', c_ubyte * 16),          ## @~chinese 用户定义名称       @~english User Defined Name
     ('nNetExport', c_uint),                       ## @~chinese 网口Ip地址         @~english NetWork Ip address
-    ('nReserved', c_uint * 4),                    ## @~chinese 保留字节           @~english Reserved bytes
+    ('nHostIP', c_uint),                          ## @~chinese 占用相机的主机IP地址    @~english The IP address of the host occupying the camera
+    ('nGenTLType', c_uint),                       ## @~chinese GenTL库的类型(0:普通网口相机 1:虚拟相机 2:采集卡上的相机)           @~english The GenTL Library Type of the device
+    ('nMulticastIP', c_uint),                     ## @~chinese 组播IP地址              @~english Multicast IP Address
+    ('nMulticastPort', c_uint),                   ## @~chinese 组播端口                @~english Multicast Port
 ]
 MV_GIGE_DEVICE_INFO = _MV_GIGE_DEVICE_INFO_
 
@@ -647,7 +691,8 @@ _MV_FRAME_OUT_INFO_EX_._fields_ = [
     ('UserPtr', N22_MV_FRAME_OUT_INFO_EX_3DOT_3E),           ## @~chinese 自定义指针(外部注册缓存时，内存地址对应的用户自定义指针)          @~english Custom pointer (user-defined pointer corresponding to memory address when registering external cache)
     ('nFirstLineEncoderCount', c_uint),                      ## @~chinese 首行编码器计数       @~english  First line encoder count
     ('nLastLineEncoderCount', c_uint),                       ## @~chinese 尾行编码器计数       @~english  Last line encoder count
-    ('nReserved', c_uint * 24),                              ## @~chinese 保留字节            @~english Reserved bytes
+    ('nLastFrameFlag', c_uint),                              ## @~chinese 电平结束时的最后一帧      @~english   last level frame flag
+    ('nReserved', c_uint * 23),                              ## @~chinese 保留字节            @~english Reserved bytes
 ]
 MV_FRAME_OUT_INFO_EX = _MV_FRAME_OUT_INFO_EX_
 
@@ -762,7 +807,8 @@ _MV_SAVE_IMAGE_TO_FILE_PARAM_EX_._fields_ = [
     ('pcImagePath', POINTER(c_char)),                   ## @~chinese 输入文件路径,Windows平台路径长度不超过260字节, Linux平台不超过255字节  @~english Input file path, The path length should not exceed 260 bytes on the Windows platform and 255 bytes on the Linux platform
     ('nQuality', c_uint),                               ## @~chinese JPG编码质量(50-99]，其他格式无效    @~english JPG Encoding quality(50-99]
     ('iMethodValue', c_int),                            ## @~chinese     ch:Bayer格式转为RGB24的插值方法 0-快速 1-均衡 2-最优 3-最优+ , RBGG/BRGG/GGRB/GGBR相关像素格式不支持0和3   @~english   en:Interpolation method of convert Bayer to RGB24  0-Fast 1-Equilibrium 2-Optimal 3-Optimal plus , RBGG/BRGG/GGRB/GGBR pixel formats do not support 0 and 3.
-    ('nReserved', c_uint * 8),                          ## @~chinese 保留字节           @~english Reserved bytes
+    ('nEndian', c_uint),        ## @~chinese 保存TIFF图像时的字节序 1-大端存储  0、其他值-小端存储      @~english   Byte order when saving TIFF images: 1 - big-endian storage, 0 or other 
+    ('nReserved', c_uint * 7),                          ## @~chinese 保留字节           @~english Reserved bytes
 ]
 MV_SAVE_IMAGE_TO_FILE_PARAM_EX = _MV_SAVE_IMAGE_TO_FILE_PARAM_EX_
 
@@ -773,7 +819,8 @@ _MV_CC_SAVE_IMAGE_PARAM_._fields_ = [
     ('enImageType', MV_SAVE_IAMGE_TYPE),    ## @~chinese    输入图片格式  @~english Enter image format.
     ('nQuality', c_uint),       ## @~chinese      JPG编码质量(50-99]，其它格式无效   @~english   JPEG Encoding Quality (50–99), Other Formats Are Invalid.
     ('iMethodValue', c_int),    ## @~chinese     ch:Bayer格式转为RGB24的插值方法 0-快速 1-均衡 2-最优 3-最优+ , RBGG/BRGG/GGRB/GGBR相关像素格式不支持0和3   @~english   en:Interpolation method of convert Bayer to RGB24  0-Fast 1-Equilibrium 2-Optimal 3-Optimal plus , RBGG/BRGG/GGRB/GGBR pixel formats do not support 0 and 3.
-    ('nReserved', c_uint * 8),
+    ('nEndian', c_uint),        ## @~chinese 保存TIFF图像时的字节序 1-大端存储  0、其他值-小端存储      @~english   Byte order when saving TIFF images: 1 - big-endian storage, 0 or other 
+    ('nReserved', c_uint * 7),
 ]
 MV_CC_SAVE_IMAGE_PARAM = _MV_CC_SAVE_IMAGE_PARAM_
 
@@ -1006,11 +1053,24 @@ MV_CC_RECORD_PARAM = _MV_CC_RECORD_PARAM_T_
 class _MV_CC_INPUT_FRAME_INFO_T_(Structure):
     pass
 _MV_CC_INPUT_FRAME_INFO_T_._fields_ = [
-    ('pData', POINTER(c_ubyte)),  ## @~chinese 图像数据指针           @~english Input Data Buffer
-    ('nDataLen', c_uint),         ## @~chinese  输入数据大小          @~english Input Data Size
+    ('pData', POINTER(c_ubyte)),  ## @~chinese 图像数据指针           @~english Image data pointer
+    ('nDataLen', c_uint),         ## @~chinese  输入数据大小          @~english Image length
     ('nRes', c_uint * 8),         ## @~chinese 保留字节               @~english Reserved bytes
 ]
 MV_CC_INPUT_FRAME_INFO = _MV_CC_INPUT_FRAME_INFO_T_
+
+# \~chinese 录像数据    @~english Record Data
+class _MV_CC_INPUT_FRAME_INFO_EX_T_(Structure):
+    pass
+_MV_CC_INPUT_FRAME_INFO_EX_T_._fields_ = [
+    ('enPixelType', MvGvspPixelType),           ## @~chinese 输入数据的像素格式          @~english Pixel format of the input data
+    ('nWidth', c_uint),                       ## @~chinese 图像宽                    @~english Image width
+    ('nHeight', c_uint),                      ## @~chinese 图像高                   @~english Image height
+    ('pData', POINTER(c_ubyte)),  ## @~chinese 图像数据指针           @~english  Image data pointer
+    ('nDataLen', c_uint64),         ## @~chinese  输入数据大小          @~english Image length
+    ('nRes', c_uint * 8),         ## @~chinese 保留字节               @~english Reserved bytes
+]
+MV_CC_INPUT_FRAME_INFO_EX = _MV_CC_INPUT_FRAME_INFO_EX_T_
 
 # values for enumeration '_MV_CAM_ACQUISITION_MODE_'
 _MV_CAM_ACQUISITION_MODE_ = c_int # enum
@@ -1134,9 +1194,9 @@ _MV_ACTION_CMD_INFO_T._fields_ = [
     ('nGroupKey', c_uint),         ## @~chinese 组键                                          @~english Group key
     ('nGroupMask', c_uint),        ## @~chinese 组掩码                                         @~english Group mask
     ('bActionTimeEnable', c_uint), ## @~chinese 只有设置成1时Action Time才有效，非1时无效         @~english Action time enable
-    ('nActionTime', int64_t),      ## @~chinese 预定的时间，和主频有关                             @~english Action time
+    ('nActionTime', int64_t),      ## @~chinese 动作生效的时间，和相机主频有关，与相机时间戳处于同一时间域    @~english The action time is related to the camera's main frequency and is in the same time domain as the camera timestamp.
     ('pBroadcastAddress', STRING), ## @~chinese 广播包地址                                         @~english Broadcast address
-    ('nTimeOut', c_uint),          ## @~chinese 等待ACK的超时时间，如果为0表示不需要ACK               @~english Timeout
+    ('nTimeOut', c_uint),          ## @~chinese 等待ACK的超时时间（单位ms），如果为0表示不需要ACK          @~english Timeout for waiting for ACK (in milliseconds). A value of 0 indicates no ACK is required.
     ('bSpecialNetEnable', c_uint), ## @~chinese只有设置成1时指定的网卡IP才有效，非1时无效 @~english Special IP Enable
     ('nSpecialNetIP', c_uint),    ## @~chinese 指定的网卡IP                               @~english Special Net IP address
     ('nReserved', c_uint * 14),    ## @~chinese 预留                                                 @~english Reserved bytes
@@ -1494,14 +1554,14 @@ MV_SAVE_IMAGE_PARAM_EX = _MV_SAVE_IMAGE_PARAM_T_EX_
 class _MV_SAVE_IMG_TO_FILE_PARAM_(Structure):
     pass
 _MV_SAVE_IMG_TO_FILE_PARAM_._fields_ = [
-    ('enPixelType', MvGvspPixelType),    ## @~chinese 输入数据的像素格式                    @~english The pixel format of the input data
-    ('pData', POINTER(c_ubyte)),         ## @~chinese 输入数据缓存                          @~english Input Data Buffer
-    ('nDataLen', c_uint),                ## @~chinese 输入数据大小                           @~english Input Data Size
-    ('nWidth', c_ushort),                ## @~chinese 图像宽                                  @~english Image Width
+    ('enPixelType', MvGvspPixelType),    ## @~chinese 输入数据的像素格式                       @~english The pixel format of the input data
+    ('pData', POINTER(c_ubyte)),         ## @~chinese 输入数据缓存                             @~english Input Data Buffer
+    ('nDataLen', c_uint),                ## @~chinese 输入数据大小                             @~english Input Data Size
+    ('nWidth', c_ushort),                ## @~chinese 图像宽                                   @~english Image Width
     ('nHeight', c_ushort),               ## @~chinese 图像高                                   @~english Image Height
-    ('enImageType', MV_SAVE_IAMGE_TYPE), ## @~chinese 输入图片格式                               @~english Input Image Format
-    ('nQuality', c_uint),                ## @~chinese JPG编码质量(50-99]         @~english JPG Encoding quality(50-99]
-    ('pImagePath', c_char * 256),        ## @~chinese 输入文件路径         @~english Input file path
+    ('enImageType', MV_SAVE_IAMGE_TYPE), ## @~chinese 输入图片格式                             @~english Input Image Format
+    ('nQuality', c_uint),                ## @~chinese JPG编码质量(50-99]                       @~english JPG Encoding quality(50-99]
+    ('pImagePath', c_char * 256),        ## @~chinese 输入文件路径                             @~english Input file path
  ## @~chinese     ch:Bayer格式转为RGB24的插值方法 0-快速 1-均衡 2-最优 3-最优+ , RBGG/BRGG/GGRB/GGBR相关像素格式不支持0和3
  ## @~english   en:Interpolation method of convert Bayer to RGB24  0-Fast 1-Equilibrium 2-Optimal 3-Optimal plus , RBGG/BRGG/GGRB/GGBR pixel formats do not support 0 and 3.
     ('iMethodValue', c_int),             
@@ -1514,18 +1574,117 @@ MV_SAVE_IMG_TO_FILE_PARAM = _MV_SAVE_IMG_TO_FILE_PARAM_
 class _MV_CC_PIXEL_CONVERT_PARAM_T_(Structure):
     pass
 _MV_CC_PIXEL_CONVERT_PARAM_T_._fields_ = [
-    ('nWidth', c_ushort),                ## @~chinese 图像宽             @~english Image Width
-    ('nHeight', c_ushort),               ## @~chinese 图像高              @~english Image Height
-    ('enSrcPixelType', MvGvspPixelType), ## @~chinese 源像素格式            @~english Source pixel format
+    ('nWidth', c_ushort),                ## @~chinese 图像宽                 @~english Image Width
+    ('nHeight', c_ushort),               ## @~chinese 图像高                 @~english Image Height
+    ('enSrcPixelType', MvGvspPixelType), ## @~chinese 源像素格式             @~english Source pixel format
     ('pSrcData', POINTER(c_ubyte)),      ## @~chinese 输入数据缓存           @~english Input data buffer
-    ('nSrcDataLen', c_uint),             ## @~chinese 输入数据大小            @~english Input data size
-    ('enDstPixelType', MvGvspPixelType), ## @~chinese 目标像素格式             @~english Destination pixel format
-    ('pDstBuffer', POINTER(c_ubyte)),    ## @~chinese 输出数据缓存              @~english Output data buffer
-    ('nDstLen', c_uint),                 ## @~chinese 输出数据大小               @~english Output data size
-    ('nDstBufferSize', c_uint),          ## @~chinese 提供的输出缓冲区大小         @~english Provided outbut buffer size
-    ('nRes', c_uint * 4),                ## @~chinese 保留字节                     @~english Reserved bytes
+    ('nSrcDataLen', c_uint),             ## @~chinese 输入数据大小           @~english Input data size
+    ('enDstPixelType', MvGvspPixelType), ## @~chinese 目标像素格式           @~english Destination pixel format
+    ('pDstBuffer', POINTER(c_ubyte)),    ## @~chinese 输出数据缓存           @~english Output data buffer
+    ('nDstLen', c_uint),                 ## @~chinese 输出数据大小           @~english Output data size
+    ('nDstBufferSize', c_uint),          ## @~chinese 提供的输出缓冲区大小   @~english Provided outbut buffer size
+    ('nRes', c_uint * 4),                ## @~chinese 保留字节               @~english Reserved bytes
 ]
 MV_CC_PIXEL_CONVERT_PARAM = _MV_CC_PIXEL_CONVERT_PARAM_T_
+
+
+
+
+# values for enumeration '_MV_CC_LIQUIDLENS_MSG_TYPE_'
+## @~chinese 液态镜头正常消息类型  比如 MV_CC_LIQUIDLENS_MSG_FOCAL_POWER_CHANGE  @~english  Common Liquid Lens Message Type, e.g., MV_CC_LIQUIDLENS_MSG_FOCAL_POWER_CHANGE
+_MV_CC_LIQUIDLENS_MSG_TYPE_ = c_int # enum
+MV_CC_LIQUIDLENS_MSG_TYPE = _MV_CC_LIQUIDLENS_MSG_TYPE_
+
+# values for enumeration '_MV_CC_LIQUIDLENS_EXCEPTION_TYPE_'  
+## @~chinese 液态镜头异常 比如: MV_CC_LIQUIDLENS_EXCEPTION_OFFLINE        @~english  liquid lens anomaly, e.g., MV_CC_LIQUIDLENS_EXCEPTION_OFFLINE
+_MV_CC_LIQUIDLENS_EXCEPTION_TYPE_ = c_int # enum
+MV_CC_LIQUIDLENS_EXCEPTION_TYPE = _MV_CC_LIQUIDLENS_EXCEPTION_TYPE_
+
+
+## @~chinese 液态镜头消息回调信息\        @~english LiquidLens msg callback infomation
+class _MV_CC_LIQUIDLENS_MSG_(Structure):
+    pass
+_MV_CC_LIQUIDLENS_MSG_._fields_ = [
+    ('nMsgType', MV_CC_LIQUIDLENS_MSG_TYPE),        ## @~chinese     消息类型        @~english Message type
+    ('nCurFocalPower', c_int),                      ## @~chinese 消息数据，当 nMsgType为 MV_CC_LIQUIDLENS_MSG_FOCAL_POWER_CHANGE 时，表示当前光焦度值（光焦度（实际）* 1000），其他消息类型请忽略此值    @~english Message data, when nMsgType is MV_CC_LIQUIDLENS_MSG_FOCAL_POWER_CHANGE, indicates current focal power value (actual focal power * 1000), ignore this value for other message types
+    ('nReserved', c_uint * 16),                    ## @~chinese 预留    @~english Reserved
+]
+MV_CC_LIQUIDLENS_MSG = _MV_CC_LIQUIDLENS_MSG_
+
+
+## @~chinese 液态镜头异常消息回调信息    @~english   Callback Information for Liquid Lens Exception Messages
+class _MV_CC_LIQUIDLENS_EXCEPTION_MSG_(Structure):
+    pass
+_MV_CC_LIQUIDLENS_EXCEPTION_MSG_._fields_ = [
+    ('nMsgType', MV_CC_LIQUIDLENS_EXCEPTION_TYPE),         ## @~chinese 消息类型    @~english Excepition Message type
+    ('nReserved', c_uint * 16),                            ## @~chinese 预留        @~english Reserved
+]
+MV_CC_LIQUIDLENS_EXCEPTION_MSG = _MV_CC_LIQUIDLENS_EXCEPTION_MSG_
+
+
+
+
+## @~chinese     液态镜头基本信息  @~english   LiquidLens basic information
+class _MV_CC_LIQUIDLENS_INFO_(Structure):
+    pass
+_MV_CC_LIQUIDLENS_INFO_._fields_ = [
+    ('chSerialNumber', c_ubyte * 64),           ## @~chinese 序列号                       @~english Serial Number
+    ('chModelName', c_ubyte * 64),               ## @~chinese 型号名字                    @~english Model Name
+    ('chFirmwareVersion', c_ubyte * 64),         ## @~chinese 驱动板的固件版本           @~english Fireware Version    
+    ('nSupportsTempCompensation', c_int),        ## @~chinese 是否支持温度补偿,0-不支持，1-支持        @~english Supports Tempperature Compensation 0-unsupported 1-supported
+    ('nLensStableTime', c_uint),                ## @~chinese 镜头稳定时间，单位ms        @~english Lens stable time ms
+    ('nMaxFocalPower', c_int),                   ## @~chinese 镜头的最大光焦度（1000 * dpt)     @~english Maximum focal power of the lens (1000 × dpt) 
+    ('nMinFocalPower', c_int),                   ## @~chinese 镜头的最小光焦度（1000 * dpt）    @~english Minimum focal power of the lens (1000 × dpt)
+    ('nRes', c_uint * 32),                      ## @~chinese 预留                        @~english Reserved
+]
+MV_CC_LIQUIDLENS_INFO = _MV_CC_LIQUIDLENS_INFO_
+
+
+## @~chinese 液态镜头区间扫描\n光焦度范围取决于镜头所支持的范围。可通过 MvCameraControl_class.MV_CC_LiquidLens_Open() 获取。   @~english LiquidLens range scan
+class _MV_CC_LIQUIDLENS_RANGE_SCAN_PARAM_(Structure):
+    pass
+_MV_CC_LIQUIDLENS_RANGE_SCAN_PARAM_._fields_ = [
+    ('nFocalPowerStart', c_int),                ## @~chinese  起始光焦度值            @~english Start focal power value
+    ('nFocalPowerEnd', c_int),                  ## @~chinese  结束光焦度值            @~english End focal power value
+    ('nSteps', c_uint),                         ## @~chinese  扫描步数,扫描步数，范围：[1,200]                      @~english Scan steps, range: [1,200]
+    ('nDwellTimeMs', c_uint),                   ## @~chinese  每步停留时间（毫秒）范围[1,10000]                     @~english   Dwell time per step (ms) range [1,10000], after moving to specified focal power, wait this period to ensure lens stability and complete image acquisition
+    ('nRes', c_uint * 8),                       ## @~chinese  预留    @~english  Reserved
+] 
+MV_CC_LIQUIDLENS_RANGE_SCAN_PARAM = _MV_CC_LIQUIDLENS_RANGE_SCAN_PARAM_
+
+
+
+
+
+## @~chinese 液态镜头自动对焦\n光焦度范围取决于镜头所支持的范围。可通过 MvCameraControl_class.MV_CC_LiquidLens_Open() 获取。        @~english   LiquidLens autofocus
+class _MV_CC_LIQUIDLENS_AUTOFOCUS_PARAM_(Structure):
+    pass
+_MV_CC_LIQUIDLENS_AUTOFOCUS_PARAM_._fields_ = [
+    ('nFocalPowerStart', c_int),      ## @~chinese 起始光焦度值     		 @~english  Start focal power value
+    ('nFocalPowerEnd', c_int),        ## @~chinese 结束光焦度值               @~english  End focal power value
+    ('nCoarseSteps', c_uint),         ## @~chinese 粗调阶段步数，范围[3-20], 推荐6。步数越大，搜索越精细但对焦耗时越长；步数越小，搜索越快但可能错过最佳焦点   @~english Coarse adjustment steps, range [3-20], recommended 6. Larger steps: finer search but longer focus time; Smaller steps: faster search but may miss best focus
+    ('nRoiEnable', c_int),            ## @~chinese 是否使能ROI,0-禁用，非0-使能        @~english   Enable ROI, 0-disable, non-zero enable
+    ('nOffsetX', c_uint),             ## @~chinese ROI区域左上角X坐标        @~english  ROI area top-left X coordinate
+    ('nOffsetY', c_uint),             ## @~chinese ROI区域左上角Y坐标        @~english  ROI area top-left Y coordinate
+    ('nRoiWidth', c_uint),            ## @~chinese ROI区域宽度               @~english  ROI area width
+    ('nRoiHeight', c_uint),           ## @~chinese ROI区域高度               @~english  ROI area height
+    ('nRes', c_uint * 10),             ## @~chinese 预留                      @~english  Reserved
+]
+MV_CC_LIQUIDLENS_AUTOFOCUS_PARAM = _MV_CC_LIQUIDLENS_AUTOFOCUS_PARAM_
+
+
+
+## @~chinese 液态镜头多焦度轮询\n光焦度范围取决于镜头所支持的范围。可通过 MvCameraControl_class.MV_CC_LiquidLens_Open() 获取。           @~english  LiquidLens multi focal power scan
+class _MV_CC_LIQUIDLENS_MULTI_FP_SCAN_PARAM_(Structure):
+    pass
+_MV_CC_LIQUIDLENS_MULTI_FP_SCAN_PARAM_._fields_ = [
+    ('nFocalPowerNum', c_uint),                        ## @~chinese 实际光焦度数量,范围[1, 32]                            @~english Actual focal power count, range[1, 32]
+    ('nFocalPowers', c_int * 32),                      ## @~chinese 光焦度数组,光焦度数值范围       @~english Focal power array, focal power value
+    ('nDwellTimeMs', c_uint * 32),                     ## @~chinese 光焦度停留时间(毫秒)数组,数值范围[1,10000]            @~english Dwell time (ms) array, time(ms) value range [1,10000]
+    ('nRes', c_uint * 8),                              ## @~chinese 预留                                                  @~english  Reserved
+]
+MV_CC_LIQUIDLENS_MULTI_FP_SCAN_PARAM = _MV_CC_LIQUIDLENS_MULTI_FP_SCAN_PARAM_
+
 
 
 __all__ = ['_MV_ALL_MATCH_INFO_', 'MV_CC_FILE_ACCESS_PROGRESS',
@@ -1539,7 +1698,7 @@ __all__ = ['_MV_ALL_MATCH_INFO_', 'MV_CC_FILE_ACCESS_PROGRESS',
            'MV_GrabStrategy_UpcomingImage', 'IFT_IFloat',
            'MV_EVENT_OUT_INFO', 'MV_TRANSMISSION_TYPE',
            'uint_fast16_t', 'MV_CHUNK_DATA_CONTENT','MV_ACTION_CMD_RESULT',
-           'MV_CC_INPUT_FRAME_INFO',
+           'MV_CC_INPUT_FRAME_INFO','MV_CC_INPUT_FRAME_INFO_EX',
            '_MV_ACTION_CMD_RESULT_T',
            'AM_RO', 'IFT_IPort', 'uint_least16_t',
            '_MV_FRAME_OUT_INFO_EX_', '_MV_TRANSMISSION_TYPE_T',
@@ -1582,7 +1741,7 @@ __all__ = ['_MV_ALL_MATCH_INFO_', 'MV_CC_FILE_ACCESS_PROGRESS',
            '_MV_CAM_EXPOSURE_AUTO_MODE_',
            'uint_least8_t',
            'MV_ACTION_CMD_INFO',
-           '_MV_CC_INPUT_FRAME_INFO_T_',
+           '_MV_CC_INPUT_FRAME_INFO_T_', '_MV_CC_INPUT_FRAME_INFO_EX_T_',
            'MV_GENTL_DEV_INFO_LIST', '_MV_CAM_TRIGGER_SOURCE_',
            'MV_GRAB_STRATEGY',
            'IFT_IEnumeration', 'uint64_t', 'uint8_t',
@@ -1627,6 +1786,15 @@ __all__ = ['_MV_ALL_MATCH_INFO_', 'MV_CC_FILE_ACCESS_PROGRESS',
            '_MV_CC_FILE_ACCESS_T',
            '_MV_DISPLAY_FRAME_INFO_','MV_GrabStrategy_OneByOne',
            'MV_TRIGGER_SOURCE_SOFTWARE', 'MV_FormatType_Undefined',
+           'MV_TRIGGER_SOURCE_LINE4', 'MV_TRIGGER_SOURCE_EncoderModuleOut',
+           'MV_TRIGGER_SOURCE_CCC1', 'MV_TRIGGER_SOURCE_Action2',
+           'MV_TRIGGER_SOURCE_CCC2', 'MV_TRIGGER_SOURCE_CCC3',
+           'MV_TRIGGER_SOURCE_CCC4', 'MV_TRIGGER_SOURCE_LINE5',
+           'MV_TRIGGER_SOURCE_LINE6', 'MV_TRIGGER_SOURCE_LINE7',
+           'MV_TRIGGER_SOURCE_LINE8', 'MV_TRIGGER_SOURCE_LINE9',
+           'MV_TRIGGER_SOURCE_LINE10', 'MV_TRIGGER_SOURCE_LINE11',
+           'MV_TRIGGER_SOURCE_Action1', 'MV_TRIGGER_SOURCE_Action3',
+           'MV_TRIGGER_SOURCE_Action4', 'MV_TRIGGER_SOURCE_Anyway',
            'MV_BALANCEWHITE_AUTO_ONCE',
            'uintmax_t', 'int_fast16_t',
            '_MV_CAM_EXPOSURE_MODE_','MV_BALANCEWHITE_AUTO_OFF',
@@ -1667,6 +1835,10 @@ __all__ = ['_MV_ALL_MATCH_INFO_', 'MV_CC_FILE_ACCESS_PROGRESS',
            'MV_CC_STREAM_EXCEPTION_DISCONNECTED', 'MV_CC_STREAM_EXCEPTION_DEVICE', 
            'MV_CC_STREAM_EXCEPTION_PARTIAL_IMAGE', 'MV_CC_STREAM_EXCEPTION_IMAGE_BUFFER_OVERFLOW', 
            '_MV_IMAGE_RECONSTRUCTION_METHOD_', 'MV_IMAGE_RECONSTRUCTION_METHOD', 'MV_SPLIT_BY_LINE',
+           'MV_CC_LIQUIDLENS_MSG_FOCAL_POWER_CHANGE','MV_CC_LIQUIDLENS_MSG_RANGE_SCAN_COMPLETED','MV_CC_LIQUIDLENS_MSG_MULTI_FP_SCAN_COMPLETED',
+           'MV_CC_LIQUIDLENS_EXCEPTION_OFFLINE', 'MV_CC_LIQUIDLENS_EXCEPTION_RECONNECTED',
+           'MV_CC_LIQUIDLENS_DEFAULT','MV_CC_LIQUIDLENS_USERSET1','MV_CC_LIQUIDLENS_USERSET2','MV_CC_LIQUIDLENS_USERSET3',
+           
            'MVCC_COLORF', '_MVCC_COLORF', '_MVCC_POINTF', 'MVCC_POINTF', '_MVCC_RECT_INFO', 'MVCC_RECT_INFO',
            '_MVCC_CIRCLE_INFO', 'MVCC_CIRCLE_INFO', '_MVCC_LINES_INFO', 'MVCC_LINES_INFO', '_MV_OUTPUT_IMAGE_INFO_',
            'MV_OUTPUT_IMAGE_INFO', 'MV_RECONSTRUCT_IMAGE_PARAM', '_MV_RECONSTRUCT_IMAGE_PARAM_',
@@ -1697,4 +1869,12 @@ __all__ = ['_MV_ALL_MATCH_INFO_', 'MV_CC_FILE_ACCESS_PROGRESS',
             'MV_GIGE_PART_DATA_INFO', 
             '_MV_GIGE_MULTI_PART_DATA_TYPE_', 'MV_GIGE_MULTI_PART_DATA_TYPE',
             '_MV_GIGE_MULTI_PART_INFO_', 'MV_GIGE_MULTI_PART_INFO',
-           '_MV_CC_STREAM_EXCEPTION_INFO_T_','MV_CC_STREAM_EXCEPTION_INFO']
+           '_MV_CC_STREAM_EXCEPTION_INFO_T_','MV_CC_STREAM_EXCEPTION_INFO',
+            'MV_CC_LIQUIDLENS_MSG_TYPE','_MV_CC_LIQUIDLENS_MSG_TYPE_',
+            'MV_CC_LIQUIDLENS_EXCEPTION_TYPE','_MV_CC_LIQUIDLENS_EXCEPTION_TYPE_',
+            'MV_CC_LIQUIDLENS_MSG','_MV_CC_LIQUIDLENS_MSG_',
+            'MV_CC_LIQUIDLENS_EXCEPTION_MSG','_MV_CC_LIQUIDLENS_EXCEPTION_MSG_',
+            'MV_CC_LIQUIDLENS_INFO','_MV_CC_LIQUIDLENS_INFO_',
+            'MV_CC_LIQUIDLENS_RANGE_SCAN_PARAM','_MV_CC_LIQUIDLENS_RANGE_SCAN_PARAM_',
+            'MV_CC_LIQUIDLENS_AUTOFOCUS_PARAM','_MV_CC_LIQUIDLENS_AUTOFOCUS_PARAM_',
+            'MV_CC_LIQUIDLENS_MULTI_FP_SCAN_PARAM','_MV_CC_LIQUIDLENS_MULTI_FP_SCAN_PARAM_']

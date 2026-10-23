@@ -89,7 +89,7 @@ def find_two_vertical_rectangles(bgr_filtered, min_area=400, min_aspect=1.25):
     blobs. Returns (left_xywh, right_xywh) as (x, y, w, h) or (None, None).
     """
     gray = cv2.cvtColor(bgr_filtered, cv2.COLOR_BGR2GRAY)
-    _, binary = cv2.threshold(gray, 1, 255, cv2.THRESH_BINARY)
+    _, binary = cv2.threshold(gray, 65, 255, cv2.THRESH_BINARY) #If values are still bad try increassing the thresehold right now it is 65
     contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
     candidates = []
@@ -146,7 +146,7 @@ def inner_edge_gap_px(left_xywh, right_xywh):
     lx, ly, lw, lh = left_xywh
     rx, ry, rw, rh = right_xywh
     inner_left = lx + lw - 1
-    inner_right = rx
+    inner_right = rx  #Checking if this works RD
     return max(float(inner_right - inner_left), 1.0)
 
 
@@ -155,7 +155,7 @@ def focal_x_pixels(frame_width: int) -> float:
     if DEPTH_FX_PIXELS is not None:
         return float(DEPTH_FX_PIXELS)
     h = math.radians(float(DEPTH_HORIZONTAL_FOV_DEG))
-    return (0.5 * float(frame_width)) / math.tan(0.5 * h)
+    return (0.5 * float(frame_width)) / math.tan(0.5*h)
 
 def focal_y_pixels(frame_height: int, frame_width: int) -> float:
     """Vertical focal length in pixels; square-pixel default uses f_x * (H / W)."""
@@ -163,7 +163,7 @@ def focal_y_pixels(frame_height: int, frame_width: int) -> float:
         return float(DEPTH_FY_PIXELS)
     if DEPTH_VERTICAL_FOV_DEG is not None:
         v = math.radians(float(DEPTH_VERTICAL_FOV_DEG))
-        return (0.5 * float(frame_height)) / math.tan(0.5 * v)
+        return (0.5 * float(frame_height)) / math.tan(v)
     return focal_x_pixels(frame_width) * (float(frame_height) / float(max(frame_width, 1)))
 
 
@@ -190,16 +190,19 @@ def yaw_pitch_deg_from_image_point(
     return yaw_deg, pitch_deg
 
 
+
 def depth_cm_to_x_center(frame_width: int, gap_px: float) -> float:
     """
     Z [cm] from camera optical center to the plane of the markers, using inner-edge gap.
     Uses K = DEPTH_CALIB_Z_CM * DEPTH_CALIB_GAP_PX if both set; else K = f_x * B.
     """
+   
     if DEPTH_CALIB_Z_CM is not None and DEPTH_CALIB_GAP_PX is not None:
         k = float(DEPTH_CALIB_Z_CM) * float(DEPTH_CALIB_GAP_PX)
     else:
         k = focal_x_pixels(frame_width) * float(INNER_EDGE_SEPARATION_CM)
     return k / gap_px
+    
 
 
 def main():
@@ -310,7 +313,7 @@ def main():
                     print(
                         f"yaw {yaw_deg:+.2f}°  "
                         f"pitch {pitch_deg:+.2f}°  "
-                        f"distance {z_cm:.2f} cm  "
+                        f"distance {z_cm:.2f} cm  " 
                         f"power {power_watts:.2f} W"
                     )
                     last_print = now
