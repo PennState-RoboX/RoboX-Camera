@@ -1,3 +1,12 @@
+"""
+Every ~50 ms, check top to bottom:
+Health below threshold?  → navigate to base, keep spinning, shoot if target seen
+Ammo below threshold?    → navigate to reload point
+Enemy seen by camera?    → engage: aim + fire, keep spinning, hold or strafe
+Just got hit?            → evade: increase spin, move away from hit direction
+Otherwise                → patrol a list of waypoints to find opponents
+"""
+
 import os
 import time
 import ctypes
